@@ -6,7 +6,8 @@ public class PlayerMovement : MonoBehaviour
     
     [Header("Visuals")]
     [SerializeField] private GameObject capsule;
-
+    
+    private Camera cam;
     private float cameraOffset; // Offset camera position downward while crouching
     
     [Header("Movement")]
@@ -15,14 +16,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 finalMove;
    
     private CharacterController cc;
-    
-    
-    [Header("Looking")]
-    [SerializeField] private float mouseSensitivity;
-    private float xRotation;
-    private float yRotation;
-    private Camera cam;
-    
     
     [Header("Jumping")]
     [SerializeField] private float gravity;
@@ -46,7 +39,6 @@ public class PlayerMovement : MonoBehaviour
     // Input actions
     private InputAction _moveAction;
     private InputAction _jumpAction;
-    private InputAction _lookAction;
     private InputAction _crouchAction;
     
     
@@ -64,7 +56,6 @@ public class PlayerMovement : MonoBehaviour
         // Find references to the input action
         _moveAction = InputSystem.actions.FindAction("Move");
         _jumpAction = InputSystem.actions.FindAction("Jump");
-        _lookAction = InputSystem.actions.FindAction("Look");
         _crouchAction = InputSystem.actions.FindAction("Crouch");
         
     }
@@ -74,8 +65,6 @@ public class PlayerMovement : MonoBehaviour
     {
         
         PlayerMove();
-        
-        PlayerLook();
 
         PlayerGrav();
         
@@ -200,32 +189,7 @@ public class PlayerMovement : MonoBehaviour
     
     
     
-    private void PlayerLook() // Mouse movement
-    {
-    
-    
-        var lookVector = _lookAction.ReadValue<Vector2>(); // Get mouse movement input
-    
-        // Look up and down - only moves camera, not player object
-        float mouseY = lookVector.y * mouseSensitivity * Time.deltaTime; // Multiply by sensitivity and deltaTime
-    
-        xRotation -= mouseY; // Control rotation around x-axis
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamp the rotation so you can't flip camera
-        cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply to camera transform
-    
-    
-    
-        // Look left and right - moves player object
-        float mouseX = lookVector.x * mouseSensitivity * Time.deltaTime;
-    
-        yRotation += mouseX; // Control rotation around y-axis
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f); // Apply to player transform
-        
-        
-        
-        
-    
-    }
+   
 
     
     

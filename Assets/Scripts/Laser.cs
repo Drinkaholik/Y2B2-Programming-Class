@@ -47,7 +47,6 @@ public class Laser : MonoBehaviour
         {
             Shoot();
             
-            
         } 
         LaserBeam(); 
         Charge();
@@ -57,8 +56,8 @@ public class Laser : MonoBehaviour
 
     private void Shoot()
     {
-        if (Player.lookObject == null) return;
-        push.PushObject(Player.lookObject);
+        if (PlayerLook.lookObject == null) return;
+        push.PushObject(PlayerLook.lookObject);
         
     }
 

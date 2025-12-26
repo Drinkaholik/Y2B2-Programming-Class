@@ -2,6 +2,14 @@ using UnityEngine;
 
 // Relates to varying a "charge" number between 0 and 1, used to scale other variables.
 
+public interface IChargeInterface
+{
+
+    float charge { get; }
+    float GetCharge();
+    
+}
+
 public class Charge : MonoBehaviour, IChargeInterface
 {
 
