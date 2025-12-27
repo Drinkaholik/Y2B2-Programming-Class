@@ -1,4 +1,5 @@
 using DevScripts;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 // Describe class function here
@@ -33,6 +34,8 @@ public class Turret : MonoBehaviour
     [Header("Patrol")]
     [Tooltip("Time in seconds spent patrolling before returning to idle")] 
     [SerializeField] private float patrolTime;
+    [Tooltip("Time in seconds spent waiting before rotating to new direction")] 
+    [SerializeField] private float waitTime; 
     [SerializeField] private float patrolTurnRate;
     private Vector3 _randomDir;
     private float _count;
@@ -148,7 +151,7 @@ public class Turret : MonoBehaviour
         }
         else
         {
-            RotatePlatform(_randomDir);
+            TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
         }
         
         
@@ -165,8 +168,7 @@ public class Turret : MonoBehaviour
     private void ReadyBehaviour()
     {
         
-        
-        RotatePlatform(_playerDir);
+        TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
         
         // Transition to patrol state
         if (_obstructed || _playerDistance > detectRange)
@@ -188,7 +190,8 @@ public class Turret : MonoBehaviour
     private void AttackBehaviour()
     {
         
-        RotatePlatform(_playerDir);
+        TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
+        TransformUtils.RotateObject(barrel,player.transform.position, barrelTurnRate, Vector3.right);
         
         // Transition to ready state
         if (_playerDistance > attackRange)
@@ -198,16 +201,6 @@ public class Turret : MonoBehaviour
         
     }
     
-
-    private void RotatePlatform(Vector3 targetRotation)
-    {
-        var newRotation = new Vector3(0, platform.transform.rotation.y, 0);
-
-        newRotation.y = Mathf.Lerp(newRotation.y, targetRotation.y, platformTurnRate * Time.deltaTime);
-        
-        platform.transform.Rotate(newRotation);
-        
-    }
     
     
     
