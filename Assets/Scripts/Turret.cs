@@ -1,6 +1,7 @@
+using System;
 using DevScripts;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // Describe class function here
 
@@ -37,8 +38,11 @@ public class Turret : MonoBehaviour
     [Tooltip("Time in seconds spent waiting before rotating to new direction")] 
     [SerializeField] private float waitTime; 
     [SerializeField] private float patrolTurnRate;
-    private Vector3 _randomDir;
+    private Vector3 _randomPos;
+    private Vector3 _lastSeen; // Players last seen location
     private float _count;
+    
+    //private Coroutine _patrolCoroutine;
     
     [Header("Turning")]
     [SerializeField] private float platformTurnRate;
@@ -63,33 +67,51 @@ public class Turret : MonoBehaviour
 
     void Start()
     {
-        _randomDir = new Vector3(0, Random.Range(0, 360), 0);
+        _randomPos = new Vector3(0, Random.Range(0, 360), 0);
     }
     
     void Update()
     {
-        SwitchState();
-        
+        PlayerInfo();
         ShootRay();
         
-        _playerDistance = Vector3.Distance(player.transform.position, transform.position);
-        _playerDir = (player.transform.position - transform.position).normalized;
+        SwitchState();
         
-        Debug.Log(_state.ToString());
     }
 
     private void ShootRay()
     {
+        // Ray origin is the body position
+        var rayObjects = Physics.RaycastAll(barrel.transform.parent.position, _playerDir, _playerDistance);
         
-        Physics.Raycast(transform.position, _playerDir, out RaycastHit hit);
-        Debug.DrawRay(transform.position, _playerDir * hit.distance, Color.red);
+        Array.Sort(rayObjects, (a, b) => a.distance.CompareTo(b.distance));
 
-        _playerDistance = hit.distance;
-        _obstructed = hit.collider != player;
+        foreach (var obj in rayObjects)
+        {
+            // If hit object belongs to the turret, ignore it
+            if (obj.transform.IsChildOf(transform))
+                continue;
+            
+            _obstructed = obj.transform != player.transform;
+            //Debug.Log(_obstructed);
+
+            break;
+
+        }
+        
+        Debug.DrawRay(barrel.transform.parent.position, _playerDir * _playerDistance, Color.red);
+        
         
     }
 
-
+    private void PlayerInfo()
+    {
+        // All calcs use the body transform as the origin 
+        _playerDir = (player.transform.position - barrel.transform.parent.position).normalized;
+        _playerDistance = Vector3.Distance(player.transform.position, barrel.transform.parent.position);
+    }
+    
+    
     private void SwitchState()
     {
 
@@ -126,14 +148,13 @@ public class Turret : MonoBehaviour
     private void IdleBehaviour()
     {
         
+        // Make it so barrel moves down to minAngle
         
         // Transition to ready state
-
         if (!_obstructed && _playerDistance <= detectRange)
         {
-            
             _state = TurretState.Ready;
-            
+            Debug.Log(_state);
         }
         
     }
@@ -144,22 +165,33 @@ public class Turret : MonoBehaviour
         
         _count -= Time.deltaTime; // Time spent in patrol state
 
-        if (transform.rotation.eulerAngles == _randomDir)
+        var range = 10;
+        
+        // Find new rotation if 
+        if (platform.transform.forward == (_randomPos - platform.transform.position).normalized)
         {
-            _randomDir = new Vector3(0, Random.Range(0, 360), 0);
+            // New rotation is based on player's last seen position
+            _randomPos = new Vector3(_lastSeen.x + Random.Range(-range, range), 0, _lastSeen.z + Random.Range(-range, range));
             
         }
         else
         {
-            TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
+            TransformUtils.RotateAt(platform, _randomPos, platformTurnRate, transform.up);
         }
-        
         
         
         // Transition to idle state
         if (_count <= 0)
         {
             _state = TurretState.Idle;
+            Debug.Log(_state);
+        }
+        
+        // Transition to ready state
+        if (!_obstructed && _playerDistance <= detectRange)
+        {
+            _state = TurretState.Ready;
+            Debug.Log(_state);
         }
         
     }
@@ -168,20 +200,23 @@ public class Turret : MonoBehaviour
     private void ReadyBehaviour()
     {
         
-        TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
+        PlatformRotate();
+        BarrelRotate();
         
         // Transition to patrol state
         if (_obstructed || _playerDistance > detectRange)
         {
+            _lastSeen = player.transform.position;
             _count = patrolTime;
             _state = TurretState.Patrol;
+            Debug.Log(_state);
         }
         
         // Transition to attack state
         else if (_playerDistance <= attackRange)
         {
-            
             _state = TurretState.Attack;
+            Debug.Log(_state);
         }
         
     }
@@ -189,16 +224,28 @@ public class Turret : MonoBehaviour
 
     private void AttackBehaviour()
     {
-        
-        TransformUtils.RotateObject(platform,player.transform.position, platformTurnRate, Vector3.up);
-        TransformUtils.RotateObject(barrel,player.transform.position, barrelTurnRate, Vector3.right);
+
+        PlatformRotate();
+        BarrelRotate();
         
         // Transition to ready state
         if (_playerDistance > attackRange)
         {
             _state = TurretState.Ready;
+            Debug.Log(_state);
         }
         
+    }
+
+
+    void PlatformRotate()
+    {
+        TransformUtils.RotateAt(platform,player.transform.position, platformTurnRate, transform.up);
+    }
+
+    void BarrelRotate()
+    {
+        TransformUtils.RotateAt(barrel,player.transform.position, barrelTurnRate, platform.transform.right, minAngle, maxAngle);
     }
     
     
