@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 // Describe class function here
 
-public class Turret : MonoBehaviour
+public class Turret : MonoBehaviour, IDamageable
 {
     
     [Header("References")]
@@ -242,10 +242,24 @@ public class Turret : MonoBehaviour
     {
         TransformUtils.RotateAt(platform,player.transform.position, platformTurnRate, transform.up);
     }
+    
+    // It fucking works!!! Utter bullshit that it took this long
 
     void BarrelRotate()
     {
-        TransformUtils.RotateAt(barrel,player.transform.position, barrelTurnRate, platform.transform.right, minAngle, maxAngle);
+        var target = player.transform.position;
+        var targetDir = (barrel.transform.position - target).normalized;
+        var targetRotation =  Quaternion.LookRotation(targetDir);
+        float angle = -targetRotation.eulerAngles.x;
+        if (angle < -180) angle += 360;
+        float clampedAngle = Mathf.Clamp(angle, minAngle, maxAngle);
+        barrel.transform.localRotation = Quaternion.Euler(clampedAngle, 0, 0);
+    }
+
+
+    public void TakeDamage(int damage)
+    {
+        _health -= damage;
     }
     
     
