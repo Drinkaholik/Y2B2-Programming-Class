@@ -23,9 +23,7 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private int maxHealth;
     private int _health;
     
-    [SerializeField] private int damage;
     [SerializeField] private float fireRate;
-    [SerializeField] private float bulletSpeed;
     [SerializeField] private GameObject bullet;
     
     [SerializeField] private float detectRange;
@@ -38,11 +36,13 @@ public class Turret : MonoBehaviour, IDamageable
     [Tooltip("Time in seconds spent waiting before rotating to new direction")] 
     [SerializeField] private float waitTime; 
     [SerializeField] private float patrolTurnRate;
+    
     private Vector3 _randomPos;
+    [SerializeField] private float randomRange;
+    private bool _inPosition;
     private Vector3 _lastSeen; // Players last seen location
     private float _count;
     
-    //private Coroutine _patrolCoroutine;
     
     [Header("Turning")]
     [SerializeField] private float platformTurnRate;
@@ -54,6 +54,8 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float minAngle;
     [Tooltip("How far up the turret barrel can look")]
     [SerializeField] private float maxAngle;
+    
+    private bool _lookingAtPlayer;
 
     private enum TurretState
     {
@@ -163,15 +165,20 @@ public class Turret : MonoBehaviour, IDamageable
     private void PatrolBehaviour()
     {
         
+        /* Patrol behaviour should work as such:
+         1. When the player leaves range, the turret looks in their last seen direction for x time
+         2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
+         */
+        
+        
         _count -= Time.deltaTime; // Time spent in patrol state
-
-        var range = 10;
         
         // Find new rotation if 
         if (platform.transform.forward == (_randomPos - platform.transform.position).normalized)
         {
             // New rotation is based on player's last seen position
-            _randomPos = new Vector3(_lastSeen.x + Random.Range(-range, range), 0, _lastSeen.z + Random.Range(-range, range));
+            _randomPos = new Vector3(_lastSeen.x + Random.Range(-randomRange, randomRange), 0, _lastSeen.z + Random.Range(-randomRange, randomRange));
+            Debug.Log(_randomPos);
             
         }
         else
@@ -207,6 +214,7 @@ public class Turret : MonoBehaviour, IDamageable
         if (_obstructed || _playerDistance > detectRange)
         {
             _lastSeen = player.transform.position;
+            _randomPos = new Vector3(_lastSeen.x + Random.Range(-randomRange, randomRange), 0, _lastSeen.z + Random.Range(-randomRange, randomRange));
             _count = patrolTime;
             _state = TurretState.Patrol;
             Debug.Log(_state);
@@ -250,16 +258,41 @@ public class Turret : MonoBehaviour, IDamageable
         var target = player.transform.position;
         var targetDir = (barrel.transform.position - target).normalized;
         var targetRotation =  Quaternion.LookRotation(targetDir);
-        float angle = -targetRotation.eulerAngles.x;
-        if (angle < -180) angle += 360;
-        float clampedAngle = Mathf.Clamp(angle, minAngle, maxAngle);
+        
+        // Keeps angle within a -180° to 180° range (instead of 0-360), allowing the angle clamping to work correctly
+        float targetAngle = -targetRotation.eulerAngles.x;
+        
+        if (targetAngle < -180) targetAngle += 360;
+        
+        // Change rotation by turn rate
+        var currentAngle = barrel.transform.localEulerAngles.x;
+        if (currentAngle > 180) currentAngle -= 360;
+        
+        var nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, barrelTurnRate * Time.deltaTime);
+        
+        float clampedAngle = Mathf.Clamp(nextAngle, -maxAngle, -minAngle);
         barrel.transform.localRotation = Quaternion.Euler(clampedAngle, 0, 0);
+    }
+
+    void Shoot()
+    {
+        
+        
+        
     }
 
 
     public void TakeDamage(int damage)
     {
         _health -= damage;
+    }
+
+    public void OnDestroy()
+    {
+        if (_health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
     
     
