@@ -17,6 +17,7 @@ public class PlayerLook : MonoBehaviour
     
     // Look info
     public static GameObject lookObject { get; private set; }
+    public static Vector3 lookPosition { get; private set; }
     public static GameObject lastLookedObject { get; private set; }
     public static float lookDistance { get; private set; }
     
@@ -63,7 +64,7 @@ public class PlayerLook : MonoBehaviour
         var ray = cam.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            
+            lookPosition = hit.point;
             lookObject = hit.collider.gameObject; 
             lastLookedObject = lookObject;
             lookDistance = hit.distance;

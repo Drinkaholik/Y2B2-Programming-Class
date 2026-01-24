@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DevScripts;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -31,16 +32,18 @@ public class Turret : MonoBehaviour, IDamageable
     
     
     [Header("Patrol")]
-    [Tooltip("Time in seconds spent patrolling before returning to idle")] 
+    [Tooltip("Time spent patrolling before returning to idle")] 
     [SerializeField] private float patrolTime;
-    [Tooltip("Time in seconds spent waiting before rotating to new direction")] 
+    [Tooltip("Time spent looking at player's last location")] 
+    [SerializeField] private float initialWaitTime;
+    [Tooltip("Time spent waiting at left or rightmost position")] 
     [SerializeField] private float waitTime; 
     [SerializeField] private float patrolTurnRate;
+    [Tooltip("Angle range the turret checks while patrolling")] 
+    [SerializeField] private float patrolAngle;
     
-    private Vector3 _randomPos;
-    [SerializeField] private float randomRange;
-    private bool _inPosition;
-    private Vector3 _lastSeen; // Players last seen location
+    private Coroutine _patrolRoutine;
+    private float _startAngle;
     private float _count;
     
     
@@ -66,11 +69,7 @@ public class Turret : MonoBehaviour, IDamageable
     }
     
     private TurretState _state = TurretState.Idle;
-
-    void Start()
-    {
-        _randomPos = new Vector3(0, Random.Range(0, 360), 0);
-    }
+    
     
     void Update()
     {
@@ -112,6 +111,28 @@ public class Turret : MonoBehaviour, IDamageable
         _playerDir = (player.transform.position - barrel.transform.parent.position).normalized;
         _playerDistance = Vector3.Distance(player.transform.position, barrel.transform.parent.position);
     }
+
+    IEnumerator Patrol()
+    {
+        /* Patrol behaviour should work as such:
+         1. When the player leaves range, the turret looks in their last seen direction for x time
+         2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
+         */
+        
+        var startAngle = platform.transform.localEulerAngles.y;
+        
+        yield return new WaitForSeconds(initialWaitTime);
+        
+        var currentAngle = platform.transform.localEulerAngles.y;
+        var nextAngle = Mathf.MoveTowardsAngle(currentAngle, startAngle - patrolAngle, patrolTurnRate * Time.deltaTime);
+        var clampedAngle = Mathf.Clamp(nextAngle, startAngle -patrolAngle, startAngle + patrolAngle);
+        
+        platform.transform.rotation = Quaternion.Euler(0, clampedAngle, 0);
+        
+        yield return new WaitForSeconds(waitTime);
+        
+        
+    }
     
     
     private void SwitchState()
@@ -151,6 +172,10 @@ public class Turret : MonoBehaviour, IDamageable
     {
         
         // Make it so barrel moves down to minAngle
+        var nextAngle = Mathf.MoveTowardsAngle(
+            barrel.transform.eulerAngles.x, -minAngle, barrelTurnRate * Time.deltaTime);
+        
+        barrel.transform.localRotation = Quaternion.Euler(nextAngle, 0, 0);
         
         // Transition to ready state
         if (!_obstructed && _playerDistance <= detectRange)
@@ -165,26 +190,10 @@ public class Turret : MonoBehaviour, IDamageable
     private void PatrolBehaviour()
     {
         
-        /* Patrol behaviour should work as such:
-         1. When the player leaves range, the turret looks in their last seen direction for x time
-         2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
-         */
+        
         
         
         _count -= Time.deltaTime; // Time spent in patrol state
-        
-        // Find new rotation if 
-        if (platform.transform.forward == (_randomPos - platform.transform.position).normalized)
-        {
-            // New rotation is based on player's last seen position
-            _randomPos = new Vector3(_lastSeen.x + Random.Range(-randomRange, randomRange), 0, _lastSeen.z + Random.Range(-randomRange, randomRange));
-            Debug.Log(_randomPos);
-            
-        }
-        else
-        {
-            TransformUtils.RotateAt(platform, _randomPos, platformTurnRate, transform.up);
-        }
         
         
         // Transition to idle state
@@ -197,6 +206,7 @@ public class Turret : MonoBehaviour, IDamageable
         // Transition to ready state
         if (!_obstructed && _playerDistance <= detectRange)
         {
+            StopCoroutine(_patrolRoutine);
             _state = TurretState.Ready;
             Debug.Log(_state);
         }
@@ -213,9 +223,8 @@ public class Turret : MonoBehaviour, IDamageable
         // Transition to patrol state
         if (_obstructed || _playerDistance > detectRange)
         {
-            _lastSeen = player.transform.position;
-            _randomPos = new Vector3(_lastSeen.x + Random.Range(-randomRange, randomRange), 0, _lastSeen.z + Random.Range(-randomRange, randomRange));
             _count = patrolTime;
+            _patrolRoutine = StartCoroutine(Patrol());
             _state = TurretState.Patrol;
             Debug.Log(_state);
         }

@@ -9,7 +9,7 @@ public class Laser : MonoBehaviour
     [SerializeField] private float DPS;
     [SerializeField] private float pushForce;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private GameObject laserBeam;
+    private LineRenderer _line;
     private bool laserActive;
     
     // Components
@@ -27,6 +27,10 @@ public class Laser : MonoBehaviour
         push = GetComponent<Push>();
         spin = GetComponent<Spin>();
         
+        _line = GetComponent<LineRenderer>();
+        _line.enabled = false;
+        _line.positionCount = 2;    
+        
         
         // Input system //
         _shootAction = InputSystem.actions.FindAction("Attack");
@@ -35,7 +39,6 @@ public class Laser : MonoBehaviour
         _shootAction.started += ctx => isHeldDown = true;
         _shootAction.canceled += ctx => isHeldDown = false;
         
-        laserBeam.SetActive(false);
 
     }
     
@@ -65,13 +68,15 @@ public class Laser : MonoBehaviour
     {
         if (isHeldDown && !laserActive)
         {
-            laserBeam.SetActive(true);
+            _line.enabled = true;
+            _line.SetPosition(0, firePoint.position);
+            _line.SetPosition(1, PlayerLook.lookPosition);
             laserActive = true;
             
         }
         else if (!isHeldDown && laserActive)
         {
-            laserBeam.SetActive(false);
+            _line.enabled = false;
             laserActive = false;
         }
         
