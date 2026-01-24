@@ -18,7 +18,7 @@ public class Turret : MonoBehaviour, IDamageable
     private float _playerDistance;
     private Vector3 _playerDir;
     private bool _obstructed;
-    
+    private WaitForSeconds _patrolWait;
     
     [Header("Combat")]
     [SerializeField] private int maxHealth;
@@ -32,8 +32,6 @@ public class Turret : MonoBehaviour, IDamageable
     
     
     [Header("Patrol")]
-    [Tooltip("Time spent patrolling before returning to idle")] 
-    [SerializeField] private float patrolTime;
     [Tooltip("Time spent looking at player's last location")] 
     [SerializeField] private float initialWaitTime;
     [Tooltip("Time spent waiting at left or rightmost position")] 
@@ -43,9 +41,6 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float patrolAngle;
     
     private Coroutine _patrolRoutine;
-    private float _startAngle;
-    private float _count;
-    
     
     [Header("Turning")]
     [SerializeField] private float platformTurnRate;
@@ -59,7 +54,8 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float maxAngle;
     
     private bool _lookingAtPlayer;
-
+    
+    
     private enum TurretState
     {
         Idle,
@@ -120,18 +116,50 @@ public class Turret : MonoBehaviour, IDamageable
          */
         
         var startAngle = platform.transform.localEulerAngles.y;
+        var leftAngle = startAngle - patrolAngle;
+        var rightAngle = startAngle + patrolAngle;
         
+        // Look in last seen direction for x seconds
         yield return new WaitForSeconds(initialWaitTime);
         
-        var currentAngle = platform.transform.localEulerAngles.y;
-        var nextAngle = Mathf.MoveTowardsAngle(currentAngle, startAngle - patrolAngle, patrolTurnRate * Time.deltaTime);
-        var clampedAngle = Mathf.Clamp(nextAngle, startAngle -patrolAngle, startAngle + patrolAngle);
-        
-        platform.transform.rotation = Quaternion.Euler(0, clampedAngle, 0);
-        
+        // Start rotating left
+        yield return RotateToAngle(leftAngle);
         yield return new WaitForSeconds(waitTime);
         
+        // Start rotating right
+        yield return RotateToAngle(rightAngle);
+        yield return new WaitForSeconds(waitTime);
         
+        // Start rotating left
+        yield return RotateToAngle(leftAngle);
+        yield return new WaitForSeconds(waitTime);
+        
+        // Start rotating right
+        yield return RotateToAngle(rightAngle);
+        yield return new WaitForSeconds(waitTime);
+        
+        // Rotate back to lastseen dir
+        yield return RotateToAngle(startAngle);
+
+
+        _state = TurretState.Idle;
+        Debug.Log(_state);
+
+
+    }
+    
+    // Handles rotation inside Patrol routine - needs to be IEnum instead of method
+    IEnumerator RotateToAngle(float targetAngle)
+    {
+        while (Mathf.Abs(Mathf.DeltaAngle(platform.transform.localEulerAngles.y, targetAngle)) > 0.1f)
+        {
+            var currentAngle = platform.transform.localEulerAngles.y;
+            
+            var nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, patrolTurnRate * Time.deltaTime);
+            
+            platform.transform.localRotation = Quaternion.Euler(0, nextAngle, 0);
+            yield return null;
+        }
     }
     
     
@@ -190,19 +218,6 @@ public class Turret : MonoBehaviour, IDamageable
     private void PatrolBehaviour()
     {
         
-        
-        
-        
-        _count -= Time.deltaTime; // Time spent in patrol state
-        
-        
-        // Transition to idle state
-        if (_count <= 0)
-        {
-            _state = TurretState.Idle;
-            Debug.Log(_state);
-        }
-        
         // Transition to ready state
         if (!_obstructed && _playerDistance <= detectRange)
         {
@@ -223,7 +238,6 @@ public class Turret : MonoBehaviour, IDamageable
         // Transition to patrol state
         if (_obstructed || _playerDistance > detectRange)
         {
-            _count = patrolTime;
             _patrolRoutine = StartCoroutine(Patrol());
             _state = TurretState.Patrol;
             Debug.Log(_state);

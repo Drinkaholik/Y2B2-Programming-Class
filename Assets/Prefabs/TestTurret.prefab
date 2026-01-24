@@ -470,7 +470,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8992962231614778064}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.5507956, y: -0.09076238, z: -55.089596}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -495,17 +495,16 @@ MonoBehaviour:
   barrel: {fileID: 5367229352093038020}
   firePoint: {fileID: 2936462344801224080}
   maxHealth: 200
-  damage: 5
   fireRate: 2
-  bulletSpeed: 20
   bullet: {fileID: 0}
   detectRange: 20
   attackRange: 10
-  patrolTime: 5
-  waitTime: 5
+  initialWaitTime: 2
+  waitTime: 0.8
   patrolTurnRate: 40
+  patrolAngle: 40
   platformTurnRate: 90
-  barrelTurnRate: 120
+  barrelTurnRate: 90
   shootAngle: 50
   minAngle: -30
   maxAngle: 60
