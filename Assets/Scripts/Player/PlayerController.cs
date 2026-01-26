@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Describe class function here
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
 
 
@@ -27,6 +27,16 @@ public class PlayerController : MonoBehaviour
         
         transform.position = spawnPoint.position;
         
+        
+    }
+
+    public void TakeDamage(int damage)
+    {
+        
+    }
+
+    public void OnDestroy()
+    {
         
     }
     
