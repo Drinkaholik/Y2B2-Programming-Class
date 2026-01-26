@@ -104,7 +104,7 @@ public class Turret : MonoBehaviour, IDamageable
 
         foreach (var obj in rayObjects)
         {
-            // If hit object belongs to the turret, ignore it
+            // If hit object belongs to the turret, ignore it and move to next obj
             if (obj.transform.IsChildOf(transform))
                 continue;
             
@@ -318,10 +318,12 @@ public class Turret : MonoBehaviour, IDamageable
         
         if (_fireTimer >= 1/fireRate)
         {
+            // Muzzle VFX
             var vfx = Instantiate(muzzleVFX, firePoint.position, firePoint.rotation);
             vfx.transform.parent = firePoint.transform;
             vfx.transform.localScale = _muzzleVFXSize;
             Destroy(vfx, 1);
+            
             Instantiate(bullet, firePoint.position, firePoint.rotation);
             _fireTimer = 0;
         }
