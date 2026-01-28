@@ -1,46 +1,28 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-// Template for BulletType and BulletEffect to apply their modifiers onto
+// Moves bullet, handles collisions, and checks lifetime
+// Takes all its stats from scriptableObjects
 
 public class Bullet : MonoBehaviour
 {
     
-    // Loops through list of effects on hit, calling ApplyEffect for each one. 
-    public List<BulletEffect> _bulletEffects;
     
-    // Defines bullet movement type
-    public BulletType _bulletType;
-
     private float _timeLived;
-
-    private enum Element
-    {
-        None,
-        Burn,
-        Freeze
-    }
     
-   
-    
-    void Start()
-    {
-        _bulletType.SetSize(gameObject);
-    }
-
     
     
     void Update()
     {
         CheckLifetime();
-        _bulletType.Move(gameObject);
+        PickupHandler.MovementType.Move(gameObject, PickupHandler.ShootType.speed);
     }
-
+    
+    // Destroy if in scene for too long
     void CheckLifetime()
     {
         _timeLived += Time.deltaTime;
 
-        if (_timeLived >= _bulletType.lifetime)
+        if (_timeLived >= PickupHandler.ShootType.lifetime)
         {
             Destroy(gameObject);
         }
@@ -51,15 +33,24 @@ public class Bullet : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Apply damage
-        _bulletType.OnHit(other);
+        PickupHandler.ShootType.OnHit(other);
         
-        foreach (BulletEffect fx in _bulletEffects)
+        // Apply effects
+        foreach (EffectType fx in PickupHandler.BulletEffects)
         {
-            fx.ApplyEffect(gameObject, other);
+            fx.OnHit(gameObject, other);
         }
         
+        // Apply elemental effect
+        if (PickupHandler.ElementType != null)
+        {
+            PickupHandler.ElementType.ApplyEffect(gameObject, other);
+        }
+        
+        // Destroy
         Destroy(gameObject);
     }
+    
     
     
     

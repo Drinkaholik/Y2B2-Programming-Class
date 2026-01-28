@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // Parses pickups and sends the necessary info to the bullet script
@@ -5,44 +6,21 @@ using UnityEngine;
 public class PickupHandler : MonoBehaviour
 {
     
-    public BulletType sideWinder;
-    public BulletEffect freeze;
-    public BulletEffect burn;
-    public BulletEffect explode;
-    public BulletEffect pierce;
-    public BulletEffect bounce;
+    // Loops through list of effects on hit, calling ApplyEffect for each one. 
+    public static List<EffectType> BulletEffects;
+    
+    // Defines bullet movement type
+    public static MovementType MovementType;
+
+    public static ElementType ElementType;
+
+    public static ShootType ShootType;
+    
+    
     
     public void GetPickup(Pickup.PickupType type)
     {
-        switch (type)
-        {
-            case Pickup.PickupType.SideWinder:
-            
-                
-                break;
-            case Pickup.PickupType.Freeze:
-            
-                
-                break;
-            case Pickup.PickupType.Burn:
-
-                
-                break;
-            case Pickup.PickupType.Explode:
-            
-                
-                break;
-            case Pickup.PickupType.Pierce:
-            
-                
-                break;
-            case Pickup.PickupType.Bounce:
-            
-                
-                break;
-            
-        }
-            
+        
 
     }
 

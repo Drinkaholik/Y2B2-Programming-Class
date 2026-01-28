@@ -1526,7 +1526,6 @@ GameObject:
   m_Component:
   - component: {fileID: 566897604}
   - component: {fileID: 566897606}
-  - component: {fileID: 566897605}
   m_Layer: 0
   m_Name: PickupController
   m_TagString: Untagged
@@ -1549,18 +1548,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 477803386}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &566897605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 566897603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac58ecb9bb3fea46ac2b51f8bf2eea0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &566897606
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1596,7 +1583,7 @@ GameObject:
   - component: {fileID: 600955138}
   - component: {fileID: 600955140}
   - component: {fileID: 600955142}
-  - component: {fileID: 600955141}
+  - component: {fileID: 600955143}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -1680,22 +1667,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mouseSensitivity: 15
---- !u!114 &600955141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 600955135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22b93fec97f1337448e449fb6ed8bbc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoint: {fileID: 2077835185}
-  health: {fileID: 600955142}
-  movement: {fileID: 600955138}
-  look: {fileID: 600955140}
 --- !u!114 &600955142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1709,6 +1680,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
+--- !u!114 &600955143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600955135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac58ecb9bb3fea46ac2b51f8bf2eea0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sideWinder: {fileID: 0}
+  freeze: {fileID: 0}
+  burn: {fileID: 0}
+  explode: {fileID: 0}
+  pierce: {fileID: 0}
+  bounce: {fileID: 0}
 --- !u!1 &618883865
 GameObject:
   m_ObjectHideFlags: 0
@@ -1740,7 +1729,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpawnObject: {fileID: 7849355257581112198, guid: 36aae6c0cb7f9724baa09ac8e4ae668d, type: 3}
   spawnRate: 1
-  maxBoxes: 1000
+  maxBoxes: 0
   despawnHeight: -50
   spawnRange: 15
   spawnHeight: 20
@@ -3053,7 +3042,7 @@ GameObject:
   m_IsActive: 1
 --- !u!114 &1589441956
 MonoBehaviour:
-  m_ObjectHideFlags: 2
+  m_ObjectHideFlags: 10
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -4350,7 +4339,7 @@ PrefabInstance:
     - target: {fileID: 4955742859471046205, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
       propertyPath: bullet
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6146125585879475677, guid: 38c150c85abff2c47a3c6bc37a43a66d, type: 3}
     - target: {fileID: 4955742859471046205, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
       propertyPath: player
       value: 
