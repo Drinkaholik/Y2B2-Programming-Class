@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void Die()
     {
         
-        transform.position = spawnPoint.position;
+        //transform.position = spawnPoint.position;
         
         
     }

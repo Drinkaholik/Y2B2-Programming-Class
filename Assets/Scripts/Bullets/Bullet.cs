@@ -1,33 +1,63 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-// Describe class function here
+// Template for BulletType and BulletEffect to apply their modifiers onto
 
 public class Bullet : MonoBehaviour
-{   
+{
     
-    protected BaseBullet _bullet;
+    // Loops through list of effects on hit, calling ApplyEffect for each one. 
+    public List<BulletEffect> _bulletEffects;
+    
+    // Defines bullet movement type
+    public BulletType _bulletType;
+
+    private float _timeLived;
+
+    private enum Element
+    {
+        None,
+        Burn,
+        Freeze
+    }
+    
+   
     
     void Start()
     {
-        _bullet.SetSize(gameObject);
+        _bulletType.SetSize(gameObject);
     }
 
     
     
     void Update()
     {
-        Move();   
+        CheckLifetime();
+        _bulletType.Move(gameObject);
     }
 
-    protected virtual void Move()
+    void CheckLifetime()
     {
-        transform.Translate(Vector3.forward * (_bullet.Speed * Time.deltaTime));
+        _timeLived += Time.deltaTime;
+
+        if (_timeLived >= _bulletType.lifetime)
+        {
+            Destroy(gameObject);
+        }
+        
     }
 
-
+    // On hit
     void OnTriggerEnter(Collider other)
     {
-        _bullet.OnHit(other);
+        // Apply damage
+        _bulletType.OnHit(other);
+        
+        foreach (BulletEffect fx in _bulletEffects)
+        {
+            fx.ApplyEffect(gameObject, other);
+        }
+        
         Destroy(gameObject);
     }
     

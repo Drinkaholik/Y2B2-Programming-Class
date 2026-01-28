@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3499498032971494460}
   - component: {fileID: 4619387422559022426}
   m_Layer: 0
-  m_Name: Bullet_base
+  m_Name: TestBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -122,8 +122,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df42fee5cce7a084ab815b907fcc5012, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
-  size: 0
+  _bulletEffects:
+  - {fileID: 11400000, guid: de3ef078d180f434e8377d88abc7bfaa, type: 2}
+  _bulletType: {fileID: 11400000, guid: 09175545788e2c24c8e7e21a4f223ef0, type: 2}
 --- !u!96 &4619387422559022426
 TrailRenderer:
   serializedVersion: 3

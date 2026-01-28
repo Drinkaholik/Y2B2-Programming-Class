@@ -21,3 +21,5 @@ public interface IFreezable
     
     void Freeze(int freezeAmount);
 }
+
+

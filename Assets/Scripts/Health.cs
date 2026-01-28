@@ -3,33 +3,34 @@ using UnityEngine;
 
 // Describe class function here
 
-public class Health : MonoBehaviour
+public class Health : MonoBehaviour, IDamageable
 {
     
     [SerializeField] private int maxHealth;
-    private int health;
+    private int _health;
     
     public event Action<int> OnHealthChanged;
     public event Action OnDeath;
     
     void Start()
     {
-        OnHealthChanged?.Invoke(maxHealth);
-        OnHealthChanged += CheckHealth;
+        _health = maxHealth;
+        OnHealthChanged?.Invoke(_health);
+       
     }
 
-    private void CheckHealth(int hp)
+    public void TakeDamage(int damage)
     {
-        if (hp <= 0)
-        {
-            OnDeath?.Invoke();
-
-        }
-        
+        _health -= damage;
+        OnHealthChanged?.Invoke(_health);
     }
-    
-    
-    
-    
-// Class ends here
+
+    public void OnDestroy()
+    {
+        OnDeath?.Invoke();
+        Destroy(gameObject);
+    }
+
+
+    // Class ends here
 }
