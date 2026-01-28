@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 // Holds info and methods for bullet shooting behaviour
@@ -8,20 +9,105 @@ using UnityEngine;
 public class ShootType : ScriptableObject
 {
 
-    [Header("Stats")] 
-    [SerializeField] protected int damage;
+    [Header("General Stats")] 
+    [SerializeField] private int damage;
     public float fireRate;
     public float speed;
     
-    [SerializeField] protected float size;
+    [SerializeField] private float size;
     public float lifetime;
 
 
-    public virtual void Shoot(GameObject bullet, Transform firePoint)
+    [Header("Burst Stats")] 
+    [SerializeField] private int burstAmount;
+    [SerializeField] private float delay;
+    
+    
+    [Header("Multishot Stats")] 
+    [SerializeField] private float bullets;
+    [SerializeField] private float angle;
+    
+    
+    
+    [Header("Grapeshot Stats")] 
+    [SerializeField] private float pellets;
+    [SerializeField] private float spread;
+    
+   
+
+    public enum ShootBehaviour
     {
-        bullet.transform.localScale = new Vector3(size, size, size);
-        Instantiate(firePoint, firePoint.position, firePoint.rotation);
+        Default,
+        Burst,
+        Multishot,
+        Grapeshot
     }
+
+    public ShootBehaviour shootBehaviour;
+
+
+    public virtual IEnumerator Shoot(GameObject bullet, Transform firePoint)
+    {
+        ChosenCreate(bullet, firePoint);
+        
+        // Handle fireRate
+        var waitTime = 1/fireRate;
+        if (fireRate == 0)
+            waitTime = Mathf.Epsilon;
+        
+        yield return new WaitForSeconds(waitTime);
+    }
+    
+    void ChosenCreate(GameObject bullet, Transform firePoint)
+    {
+        switch (shootBehaviour)
+        {
+            case ShootBehaviour.Default:
+                DefaultCreate(bullet, firePoint);
+                break;
+            
+            case ShootBehaviour.Burst:
+                BurstCreate(bullet, firePoint);
+                break;
+            
+            case ShootBehaviour.Multishot:
+                MultishotCreate(bullet, firePoint);
+                break;
+            
+            case ShootBehaviour.Grapeshot:
+                GrapeshotCreate(bullet, firePoint);
+                break;
+        }
+    }
+
+    void DefaultCreate(GameObject bullet, Transform firePoint)
+    {
+        // Instantiate at correct size
+        var b = Instantiate(bullet, firePoint.position, firePoint.rotation);
+        b.transform.localScale = new Vector3(size, size, size);
+    }
+
+    void BurstCreate(GameObject bullet, Transform firePoint)
+    {
+        
+        
+    }
+
+
+    void MultishotCreate(GameObject bullet, Transform firePoint)
+    {
+        
+
+    }
+
+
+    void GrapeshotCreate(GameObject bullet, Transform firePoint)
+    {
+        
+        
+        
+    }
+    
 
     public void OnHit(Collider other)
     {
@@ -33,26 +119,4 @@ public class ShootType : ScriptableObject
     }
     
 
-}
-
-
-[CreateAssetMenu(fileName = "TripleShot", menuName = "Scriptable Objects/TripleShot")]
-public class TripleShot : ShootType
-{
-    public override void Shoot(GameObject bullet, Transform firePoint)
-    {
-        
-    }
-}
-
-
-[CreateAssetMenu(fileName = "Grapeshot", menuName = "Scriptable Objects/Grapeshot")]
-public class Grapeshot : ShootType
-{
-    
-    public override void Shoot(GameObject bullet, Transform firePoint)
-    {
-        
-    }
-    
 }

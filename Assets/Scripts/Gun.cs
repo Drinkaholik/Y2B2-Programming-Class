@@ -7,7 +7,6 @@ public class Gun : MonoBehaviour
 {
 
     [Header("Combat")] 
-    [SerializeField] private float fireRate;
     [SerializeField] private GameObject bullet;
     [SerializeField] private Transform firePoint;
 

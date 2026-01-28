@@ -8,13 +8,13 @@ public class Pickup : MonoBehaviour
     
     public enum PickupType
     {
-        SideWinder,
-        Freeze,
-        Burn,
-        Explode,
-        Pierce,
-        Bounce
+        Shoot,
+        Movement, 
+        Effect,
+        Element
     }
+    
+    public enum
     
     public PickupType type;
     

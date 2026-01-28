@@ -7,7 +7,7 @@ public class PickupHandler : MonoBehaviour
 {
     
     // Loops through list of effects on hit, calling ApplyEffect for each one. 
-    public static List<EffectType> BulletEffects;
+    public static HashSet<EffectType> BulletEffects;
     
     // Defines bullet movement type
     public static MovementType MovementType;
