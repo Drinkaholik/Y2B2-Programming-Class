@@ -13,8 +13,8 @@ public class Pickup : MonoBehaviour
         Effect,
         Element
     }
-    
-    public enum
+
+    public ShootType.ShootBehaviour ShootType;
     
     public PickupType type;
     

@@ -13,21 +13,11 @@ public class Bullet : MonoBehaviour
     
     void Update()
     {
-        CheckLifetime();
+        //ShootType.CheckLifetime(gameObject, _timeLived); // Destroy if in scene for too long
         PickupHandler.MovementType.Move(gameObject, PickupHandler.ShootType.speed);
     }
     
-    // Destroy if in scene for too long
-    void CheckLifetime()
-    {
-        _timeLived += Time.deltaTime;
-
-        if (_timeLived >= PickupHandler.ShootType.lifetime)
-        {
-            Destroy(gameObject);
-        }
-        
-    }
+    
 
     // On hit
     void OnTriggerEnter(Collider other)

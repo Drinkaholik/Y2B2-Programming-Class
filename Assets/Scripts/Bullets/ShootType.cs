@@ -1,4 +1,6 @@
 using System.Collections;
+using Sirenix.OdinInspector;
+using SQLite;
 using UnityEngine;
 
 // Holds info and methods for bullet shooting behaviour
@@ -8,33 +10,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ShootType", menuName = "Scriptable Objects/ShootType")]
 public class ShootType : ScriptableObject
 {
-
-    [Header("General Stats")] 
-    [SerializeField] private int damage;
-    public float fireRate;
-    public float speed;
     
-    [SerializeField] private float size;
-    public float lifetime;
-
-
-    [Header("Burst Stats")] 
-    [SerializeField] private int burstAmount;
-    [SerializeField] private float delay;
-    
-    
-    [Header("Multishot Stats")] 
-    [SerializeField] private float bullets;
-    [SerializeField] private float angle;
-    
-    
-    
-    [Header("Grapeshot Stats")] 
-    [SerializeField] private float pellets;
-    [SerializeField] private float spread;
-    
-   
-
     public enum ShootBehaviour
     {
         Default,
@@ -44,9 +20,37 @@ public class ShootType : ScriptableObject
     }
 
     public ShootBehaviour shootBehaviour;
+    
+    [Header("General Stats")] 
+    [Min(0)] [SerializeField] private int damage;
+    [Min(0)] public float fireRate;
+    [Min(0)] public float speed;
+    
+    [Min(0.01f)] [SerializeField] private float size;
+    public float lifetime;
 
 
-    public virtual IEnumerator Shoot(GameObject bullet, Transform firePoint)
+    [Header("Burst Stats")] 
+    [Tooltip("Number of shots per burst")]
+    [HideInInspector] [SerializeField] [Min(1)] private int burstAmount;
+    [Tooltip("Delay between each shot in a burst")]
+    [HideInInspector] [SerializeField] [Min(0.01f)] private float burstDelay;
+    
+    
+    [Header("Multishot Stats")] 
+    [HideInInspector] [Min(1)] public int bullets;
+    [HideInInspector] [SerializeField] private float angle;
+    // Necessary for a dynamically updated max angle
+    [HideInInspector] public float maxAngle;
+    [HideInInspector] public float totalSpread = 180f;
+    
+    [Header("Grapeshot Stats")] 
+    [HideInInspector] [SerializeField] [Min(1)] private int pellets;
+    [HideInInspector] [SerializeField] [Range(0f, 180f)] private float spread;
+
+    public Coroutine Routine;
+
+    public IEnumerator ShootRoutine(GameObject bullet, Transform firePoint)
     {
         ChosenCreate(bullet, firePoint);
         
@@ -54,8 +58,8 @@ public class ShootType : ScriptableObject
         var waitTime = 1/fireRate;
         if (fireRate == 0)
             waitTime = Mathf.Epsilon;
-        
         yield return new WaitForSeconds(waitTime);
+        Routine = null;
     }
     
     void ChosenCreate(GameObject bullet, Transform firePoint)
@@ -83,8 +87,8 @@ public class ShootType : ScriptableObject
     void DefaultCreate(GameObject bullet, Transform firePoint)
     {
         // Instantiate at correct size
-        var b = Instantiate(bullet, firePoint.position, firePoint.rotation);
-        b.transform.localScale = new Vector3(size, size, size);
+        var newBullet = Instantiate(bullet, firePoint.position, firePoint.rotation);
+        newBullet.transform.localScale = new Vector3(size, size, size);
     }
 
     void BurstCreate(GameObject bullet, Transform firePoint)
@@ -107,8 +111,19 @@ public class ShootType : ScriptableObject
         
         
     }
-    
 
+    // Destroy if in scene for too long
+    public void CheckLifetime(GameObject bullet, float timeElapsed)
+    {
+        timeElapsed += Time.deltaTime;
+
+        if (timeElapsed >= lifetime)
+        {
+            Destroy(bullet);
+        }
+        
+    }
+    
     public void OnHit(Collider other)
     {
         // Apply damage if applicable

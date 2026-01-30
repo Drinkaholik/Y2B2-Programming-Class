@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Parses pickups and sends the necessary info to the bullet script
+// Parses pickups and sends the necessary info to the currently equipped gun
 
 public class PickupHandler : MonoBehaviour
 {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,10 +10,15 @@ public class Gun : MonoBehaviour
     [Header("Combat")] 
     [SerializeField] private GameObject bullet;
     [SerializeField] private Transform firePoint;
+    
+    // 4 types of bullet modifiers
+    private ShootType _shootType;
+    private MovementType _movementType;
+    private HashSet<EffectType> _effectType;
+    private ElementType _elementType;
 
     private InputAction _shootAction;
     private bool _tryingShoot;
-    
     
     void Start()
     {
@@ -29,9 +35,8 @@ public class Gun : MonoBehaviour
 
     void Shoot()
     {
-        if (_tryingShoot)
-            PickupHandler.ShootType.Shoot(bullet, firePoint);
-
+        if (_tryingShoot && _shootType.Routine == null)
+            _shootType.Routine = StartCoroutine(_shootType.ShootRoutine(bullet, firePoint));
     }
     
     
