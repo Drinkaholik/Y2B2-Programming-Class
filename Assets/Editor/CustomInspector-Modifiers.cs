@@ -1,12 +1,14 @@
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+
+// Custom editor script for ShootType
+// Hides / displays certain properties based on the ShootBehaviour enum
 
 [CustomEditor(typeof(ShootType))]
 public class ShootTypeEditor : Editor
 {
     // Enum
-    private SerializedProperty _typeProp;
+    private SerializedProperty _behaviourProp;
     
     // Burst props
     private SerializedProperty _burstAmountProp;
@@ -24,8 +26,9 @@ public class ShootTypeEditor : Editor
 
     void OnEnable()
     {
+        // Link up properties //
         // Enum
-        _typeProp = serializedObject.FindProperty("shootBehaviour");
+        _behaviourProp = serializedObject.FindProperty("behaviour");
         
         // Burst props
         _burstAmountProp = serializedObject.FindProperty("burstAmount");
@@ -53,14 +56,13 @@ public class ShootTypeEditor : Editor
         DrawDefaultInspector();
         
         // Display conditional properties depending on type
-        switch (_typeProp.enumValueIndex)
+        switch (_behaviourProp.enumValueIndex)
         {
             case (int)ShootType.ShootBehaviour.Burst:
                 EditorGUILayout.PropertyField(_burstAmountProp);
                 EditorGUILayout.PropertyField(_burstDelayProp);
                 break;
 
-            
             
             case (int)ShootType.ShootBehaviour.Multishot:
                 EditorGUILayout.PropertyField(_bulletsProp);
@@ -84,14 +86,61 @@ public class ShootTypeEditor : Editor
                 EditorGUILayout.PropertyField(_spreadProp);
                 break;
         }
+        
         // Apply any changes made in inspector
         serializedObject.ApplyModifiedProperties();
-
-
-
-
+        
     }
     
+}
+
+[CustomEditor(typeof(MovementType))]
+public class MovementTypeEditor : Editor
+{
+    // Enum
+    private SerializedProperty _behaviourProp;
     
-    
+    // Sidewind props
+    private SerializedProperty _amplitudeProp;
+    private SerializedProperty _frequencyProp;
+    private SerializedProperty _orientationProp;
+
+    void OnEnable()
+    {
+        // Link properties //
+        // Enum
+        _behaviourProp = serializedObject.FindProperty("behaviour");
+        
+        // Sidewind properties
+        _amplitudeProp = serializedObject.FindProperty("amplitude");
+        _frequencyProp = serializedObject.FindProperty("frequency");
+        _orientationProp = serializedObject.FindProperty("orientation");
+    }
+
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+        
+        DrawDefaultInspector();
+
+        switch (_behaviourProp.enumValueIndex)
+        {
+            case (int)MovementType.MoveBehaviour.Sidewind:
+                EditorGUILayout.PropertyField(_amplitudeProp);
+                EditorGUILayout.PropertyField(_frequencyProp);  
+                EditorGUILayout.PropertyField(_orientationProp);
+                
+                break;
+            
+            case (int)MovementType.MoveBehaviour.Spiral:
+                
+
+                break;
+        }
+        
+        
+        // Apply any changes made in inspector
+        serializedObject.ApplyModifiedProperties();
+    }
 }

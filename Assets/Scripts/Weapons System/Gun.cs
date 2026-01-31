@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Handles firerate and shooting logic
+// Injects modifiers into bullets as it shoots
+// Has no stats on its own - that's handled by ShootType
 
 public class Gun : MonoBehaviour
 {
@@ -10,15 +11,17 @@ public class Gun : MonoBehaviour
     [Header("Combat")] 
     [SerializeField] private GameObject bullet;
     [SerializeField] private Transform firePoint;
+    public BulletPool bulletPool;
     
     // 4 types of bullet modifiers
-    private ShootType _shootType;
-    private MovementType _movementType;
-    private HashSet<EffectType> _effectType;
-    private ElementType _elementType;
+    public ShootType shootType;
+    public MovementType moveType;
+    public HashSet<EffectType> effects;
+    public ElementType elementType;
 
     private InputAction _shootAction;
     private bool _tryingShoot;
+    private float _timer; // Needed for timing burst fire - didn't work with double coroutine
     
     void Start()
     {
@@ -35,8 +38,13 @@ public class Gun : MonoBehaviour
 
     void Shoot()
     {
-        if (_tryingShoot && _shootType.Routine == null)
-            _shootType.Routine = StartCoroutine(_shootType.ShootRoutine(bullet, firePoint));
+        if (_tryingShoot && shootType.Routine == null)
+        {
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bullet, firePoint, _timer));
+            var newBullet = bulletPool.Spawn();
+            newBullet.gun = this;
+        }
+            
     }
     
     
