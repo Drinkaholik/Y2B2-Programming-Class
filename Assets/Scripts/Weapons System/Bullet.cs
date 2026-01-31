@@ -6,11 +6,16 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     
-    
     private float _timeLived;
 
     [HideInInspector] public Gun gun;
-    
+
+    public TrailRenderer trail;
+
+    void Start()
+    {
+        trail = GetComponent<TrailRenderer>();
+    }
     
     void Update()
     {

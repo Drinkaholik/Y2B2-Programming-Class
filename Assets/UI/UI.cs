@@ -14,7 +14,11 @@ public class UI : MonoBehaviour
     private Label _healthLabel;
     
     // UI Objects
-    [SerializeField] private TMP_Text text1;
+    [SerializeField] private TMP_Text score;
+    [SerializeField] private TMP_Text fps;
+    
+    [SerializeField] private float smoothing = 0.1f;
+    private float smoothedFPS;
     
     private int _score;
 
@@ -30,7 +34,15 @@ public class UI : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        text1.text = "0";
+        score.text = "0";
+    }
+
+    void Update()
+    {
+        // Show FPS
+        var actualFPS = 1/Time.deltaTime;
+        smoothedFPS = Mathf.Lerp(smoothedFPS, actualFPS, smoothing);
+        fps.text = $"FPS: {Mathf.RoundToInt(smoothedFPS)}";
     }
 
     public void ScoreIncrease()
@@ -38,7 +50,7 @@ public class UI : MonoBehaviour
 
         _score++;
         
-        text1.text = $"{_score}";
+        score.text = $"{_score}";
         
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 // Holds info and methods for gun/bullet shooting behaviour
@@ -19,6 +20,7 @@ public class ShootType : ScriptableObject
 
     public ShootBehaviour behaviour;
     
+    
     [Header("General Stats")] 
     [Min(0)] [SerializeField] private int damage;
     [Min(0)] public float fireRate;
@@ -26,15 +28,14 @@ public class ShootType : ScriptableObject
     
     [Min(0.01f)] [SerializeField] private float size;
     public float lifetime;
-    // Needed to assign bullet modifiers in Gun - might not need it after doing object pooling
-    [HideInInspector] public List<Bullet> spawnedBullets = new (100);
-
-
+    
+    
     [Header("Burst Stats")] 
     [Tooltip("Number of shots per burst")]
     [HideInInspector] [SerializeField] [Min(1)] private int burstAmount;
     [Tooltip("Delay between each shot in a burst")]
     [HideInInspector] [SerializeField] [Min(0.01f)] private float burstDelay;
+    [HideInInspector] public float timer;
     
     
     [Header("Multishot Stats")] 
@@ -44,16 +45,17 @@ public class ShootType : ScriptableObject
     [HideInInspector] public float maxAngle;
     [HideInInspector] public float totalSpread = 180f;
     
+    
     [Header("Grapeshot Stats")] 
     [HideInInspector] [SerializeField] [Min(1)] private int pellets;
     [HideInInspector] [SerializeField] [Range(0f, 180f)] private float spread;
 
     public Coroutine Routine;
-   
+    
 
-    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, float timer)
+    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        ChosenCreate(bulletPool, firePoint, timer);
+        yield return ChosenCreate(bulletPool, firePoint, gun);
         
         // Handle fireRate
         var waitTime = 1/fireRate;
@@ -63,37 +65,37 @@ public class ShootType : ScriptableObject
         Routine = null;
     }
     
-    void ChosenCreate(BulletPool bulletPool, Transform firePoint, float timer)
+    // Needs to be a coroutine os that I can yield return the BurstRoutine
+    IEnumerator ChosenCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
         switch (behaviour)
         {
             case ShootBehaviour.Default:
-                DefaultCreate(bulletPool, firePoint);
+                DefaultCreate(bulletPool, firePoint, gun);
+                yield return null;
                 break;
             
             case ShootBehaviour.Burst:
-                
-                BurstCreate(bulletPool, firePoint, timer);
+                yield return BurstCreate(bulletPool, firePoint, gun);
                 break;
             
             case ShootBehaviour.Multishot:
-                MultishotCreate(bulletPool, firePoint);
+                MultishotCreate(bulletPool, firePoint, gun);
+                yield return null;
                 break;
             
             case ShootBehaviour.Grapeshot:
-                GrapeshotCreate(bulletPool, firePoint);
+                GrapeshotCreate(bulletPool, firePoint, gun);
+                yield return null;
                 break;
         }
     }
 
-    void DefaultCreate(BulletPool bulletPool, Transform firePoint)
+    void DefaultCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        // Clear list - necessary for setting each bullet's gun reference in the Gun class
-        spawnedBullets.Clear();
-        
         // Spawn from pool
         var newBullet = bulletPool.Spawn();
-        spawnedBullets.Add(newBullet);
+        newBullet.gun = gun;
         
         // Set position, rotation and size
         newBullet.transform.position = firePoint.position;
@@ -103,40 +105,36 @@ public class ShootType : ScriptableObject
     }
 
     // Shoots consecutive bullets in a rapid burst
-    void BurstCreate(BulletPool bulletPool, Transform firePoint, float timer)
-    {
-        spawnedBullets.Clear();
+    IEnumerator BurstCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    { 
         for (int i = 0; i < burstAmount; i++)
         {
-            timer += Time.deltaTime;
-            if (timer >= burstDelay)
-            {
-                // Spawn and add to list
-                var newBullet = bulletPool.Spawn();
-                spawnedBullets.Add(newBullet);
-                
-                // Set position, rotation and size
-                newBullet.transform.position = firePoint.position;
-                newBullet.transform.rotation = firePoint.rotation;
-                newBullet.transform.localScale = new Vector3(size, size, size);
-                
-                // Reset timer
-                timer = 0;
-            }
+            // Spawn from pool
+            var newBullet = bulletPool.Spawn();
+            newBullet.gun = gun;
+
+            // Set position, rotation and size
+            newBullet.transform.position = firePoint.position;
+            newBullet.transform.rotation = firePoint.rotation;
+            newBullet.transform.localScale = new Vector3(size, size, size);
+
+            newBullet.trail.Clear();
+            
+            yield return new WaitForSeconds(burstDelay);
         }
     }
+    
 
     // Shoots multiple bullets in a fan shape
-    void MultishotCreate(BulletPool bulletPool, Transform firePoint)
+    void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        spawnedBullets.Clear();
+        
 
     }
 
     // Shoots multiple bullets in a 'shotgun' blast
-    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint)
+    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        spawnedBullets.Clear();
         
         
     }

@@ -20,7 +20,7 @@ public class Gun : MonoBehaviour
 
     private InputAction _shootAction;
     private bool _tryingShoot;
-    private float _timer; // Needed for timing burst fire - didn't work with double coroutine
+    //private float _timer; // Needed for timing burst fire - didn't work with double coroutine
     
     void Start()
     {
@@ -33,18 +33,14 @@ public class Gun : MonoBehaviour
     void Update()
     {
         Shoot();
+        Debug.Log(shootType.timer);
     }
 
     void Shoot()
     {
         if (_tryingShoot && shootType.Routine == null)
         {
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bulletPool,firePoint, _timer));
-
-            foreach (var b in shootType.spawnedBullets)
-            {
-                b.gun = this;
-            }
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bulletPool,firePoint, this));
             
         }
             

@@ -44,7 +44,7 @@ public class Kick : MonoBehaviour
         // Loop through kickable list
         foreach (var obj in kickable)
         {
-            if (obj.TryGetComponent<>(out Rigidbody rb))
+            if (obj.TryGetComponent<Rigidbody>(out Rigidbody rb))
             {
                 var kickDir = Vector3.Normalize(rb.position - (transform.position + kickPoint));
             
