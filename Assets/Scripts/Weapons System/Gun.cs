@@ -9,14 +9,13 @@ public class Gun : MonoBehaviour
 {
 
     [Header("Combat")] 
-    [SerializeField] private GameObject bullet;
     [SerializeField] private Transform firePoint;
     public BulletPool bulletPool;
     
     // 4 types of bullet modifiers
     public ShootType shootType;
     public MovementType moveType;
-    public HashSet<EffectType> effects;
+    public HashSet<EffectType> effects = new();
     public ElementType elementType;
 
     private InputAction _shootAction;
@@ -40,9 +39,13 @@ public class Gun : MonoBehaviour
     {
         if (_tryingShoot && shootType.Routine == null)
         {
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bullet, firePoint, _timer));
-            var newBullet = bulletPool.Spawn();
-            newBullet.gun = this;
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bulletPool,firePoint, _timer));
+
+            foreach (var b in shootType.spawnedBullets)
+            {
+                b.gun = this;
+            }
+            
         }
             
     }

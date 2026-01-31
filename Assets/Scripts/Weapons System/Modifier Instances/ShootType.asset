@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 443e96d04d20b9647962cf63b8953aa2, type: 3}
   m_Name: ShootType
   m_EditorClassIdentifier: 
-  behaviour: 1
+  behaviour: 0
   damage: 11
   fireRate: 3.58
   speed: 100
   size: 0.3
   lifetime: 5
-  newBullet: {fileID: 0}
+  spawnedBullets:
+  - {fileID: 0}
   burstAmount: 3
   burstDelay: 0.15
   bullets: 2

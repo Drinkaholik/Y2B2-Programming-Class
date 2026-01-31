@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Holds info and methods for gun/bullet shooting behaviour
@@ -26,7 +27,7 @@ public class ShootType : ScriptableObject
     [Min(0.01f)] [SerializeField] private float size;
     public float lifetime;
     // Needed to assign bullet modifiers in Gun - might not need it after doing object pooling
-    [HideInInspector] public GameObject newBullet;
+    [HideInInspector] public List<Bullet> spawnedBullets = new (100);
 
 
     [Header("Burst Stats")] 
@@ -50,9 +51,9 @@ public class ShootType : ScriptableObject
     public Coroutine Routine;
    
 
-    public IEnumerator ShootRoutine(GameObject bullet, Transform firePoint, float timer)
+    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, float timer)
     {
-        ChosenCreate(bullet, firePoint, timer);
+        ChosenCreate(bulletPool, firePoint, timer);
         
         // Handle fireRate
         var waitTime = 1/fireRate;
@@ -62,62 +63,80 @@ public class ShootType : ScriptableObject
         Routine = null;
     }
     
-    void ChosenCreate(GameObject bullet, Transform firePoint, float timer)
+    void ChosenCreate(BulletPool bulletPool, Transform firePoint, float timer)
     {
         switch (behaviour)
         {
             case ShootBehaviour.Default:
-                DefaultCreate(bullet, firePoint);
+                DefaultCreate(bulletPool, firePoint);
                 break;
             
             case ShootBehaviour.Burst:
                 
-                BurstCreate(bullet, firePoint, timer);
+                BurstCreate(bulletPool, firePoint, timer);
                 break;
             
             case ShootBehaviour.Multishot:
-                MultishotCreate(bullet, firePoint);
+                MultishotCreate(bulletPool, firePoint);
                 break;
             
             case ShootBehaviour.Grapeshot:
-                GrapeshotCreate(bullet, firePoint);
+                GrapeshotCreate(bulletPool, firePoint);
                 break;
         }
     }
 
-    void DefaultCreate(GameObject bullet, Transform firePoint)
+    void DefaultCreate(BulletPool bulletPool, Transform firePoint)
     {
-        // Instantiate at correct size
-        newBullet = Instantiate(bullet, firePoint.position, firePoint.rotation);
+        // Clear list - necessary for setting each bullet's gun reference in the Gun class
+        spawnedBullets.Clear();
+        
+        // Spawn from pool
+        var newBullet = bulletPool.Spawn();
+        spawnedBullets.Add(newBullet);
+        
+        // Set position, rotation and size
+        newBullet.transform.position = firePoint.position;
+        newBullet.transform.rotation = firePoint.rotation;
         newBullet.transform.localScale = new Vector3(size, size, size);
+        
     }
 
-    // Doesn't work yet because newBullet is changed 3 times before the gun gains access to it
-    void BurstCreate(GameObject bullet, Transform firePoint, float timer)
+    // Shoots consecutive bullets in a rapid burst
+    void BurstCreate(BulletPool bulletPool, Transform firePoint, float timer)
     {
+        spawnedBullets.Clear();
         for (int i = 0; i < burstAmount; i++)
         {
             timer += Time.deltaTime;
             if (timer >= burstDelay)
             {
-                newBullet = Instantiate(bullet, firePoint.position, firePoint.rotation);
+                // Spawn and add to list
+                var newBullet = bulletPool.Spawn();
+                spawnedBullets.Add(newBullet);
+                
+                // Set position, rotation and size
+                newBullet.transform.position = firePoint.position;
+                newBullet.transform.rotation = firePoint.rotation;
                 newBullet.transform.localScale = new Vector3(size, size, size);
+                
+                // Reset timer
                 timer = 0;
             }
         }
     }
 
-
-    void MultishotCreate(GameObject bullet, Transform firePoint)
+    // Shoots multiple bullets in a fan shape
+    void MultishotCreate(BulletPool bulletPool, Transform firePoint)
     {
-        
+        spawnedBullets.Clear();
 
     }
 
-
-    void GrapeshotCreate(GameObject bullet, Transform firePoint)
+    // Shoots multiple bullets in a 'shotgun' blast
+    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint)
     {
-        
+        spawnedBullets.Clear();
         
         
     }

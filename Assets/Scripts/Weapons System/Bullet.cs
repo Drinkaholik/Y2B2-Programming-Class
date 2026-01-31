@@ -9,7 +9,7 @@ public class Bullet : MonoBehaviour
     
     private float _timeLived;
 
-    public Gun gun;
+    [HideInInspector] public Gun gun;
     
     
     void Update()
@@ -34,13 +34,14 @@ public class Bullet : MonoBehaviour
             fx.OnHit(gameObject, other);
         }
         
+        
         // Apply elemental effect
         if (gun.elementType != null)
         {
             gun.elementType.ApplyEffect(gameObject, other);
         }
+        
         ReturnToPool();
-        // Destroy
         
     }
     
@@ -49,6 +50,7 @@ public class Bullet : MonoBehaviour
     {
         if (_timeLived >= gun.shootType.lifetime)
         {
+            _timeLived = 0;
             ReturnToPool();
         }
         

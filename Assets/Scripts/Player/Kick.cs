@@ -44,12 +44,12 @@ public class Kick : MonoBehaviour
         // Loop through kickable list
         foreach (var obj in kickable)
         {
+            if (obj.TryGetComponent<>(out Rigidbody rb))
+            {
+                var kickDir = Vector3.Normalize(rb.position - (transform.position + kickPoint));
             
-            var rb = obj.GetComponent<Rigidbody>();
-            var kickDir = Vector3.Normalize(rb.position - (transform.position + kickPoint));
-            
-            rb.AddForce(kickDir * kickForce);
-            
+                rb.AddForce(kickDir * kickForce);
+            }
         }
     }
     
