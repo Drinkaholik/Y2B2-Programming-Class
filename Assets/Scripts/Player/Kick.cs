@@ -7,8 +7,6 @@ public class Kick : MonoBehaviour
     
     [SerializeField] private float kickForce;
 
-
-    private Camera cam;
     
     private Vector3 kickPoint = new(0, -1, 0);
     
@@ -20,9 +18,6 @@ public class Kick : MonoBehaviour
     {
         
         _kickAction = InputSystem.actions.FindAction("Kick");
-        
-        cam = Camera.main;
-        
         
     }
 

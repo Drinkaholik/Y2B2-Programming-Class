@@ -33,7 +33,6 @@ public class Gun : MonoBehaviour
     void Update()
     {
         Shoot();
-        Debug.Log(shootType.timer);
     }
 
     void Shoot()

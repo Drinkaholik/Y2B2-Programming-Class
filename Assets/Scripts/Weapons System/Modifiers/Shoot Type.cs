@@ -35,7 +35,6 @@ public class ShootType : ScriptableObject
     [HideInInspector] [SerializeField] [Min(1)] private int burstAmount;
     [Tooltip("Delay between each shot in a burst")]
     [HideInInspector] [SerializeField] [Min(0.01f)] private float burstDelay;
-    [HideInInspector] public float timer;
     
     
     [Header("Multishot Stats")] 
@@ -102,6 +101,9 @@ public class ShootType : ScriptableObject
         newBullet.transform.rotation = firePoint.rotation;
         newBullet.transform.localScale = new Vector3(size, size, size);
         
+        // Clear trailRender to prevent visual bug on bullet spawn-in
+        newBullet.trail.Clear();
+        
     }
 
     // Shoots consecutive bullets in a rapid burst
@@ -112,7 +114,7 @@ public class ShootType : ScriptableObject
             // Spawn from pool
             var newBullet = bulletPool.Spawn();
             newBullet.gun = gun;
-
+            
             // Set position, rotation and size
             newBullet.transform.position = firePoint.position;
             newBullet.transform.rotation = firePoint.rotation;
@@ -128,7 +130,24 @@ public class ShootType : ScriptableObject
     // Shoots multiple bullets in a fan shape
     void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        
+        var spreadRange = (bullets - 1) * angle;
+        for (int i = 0; i < bullets; i++)
+        {
+            var newBullet = bulletPool.Spawn();
+            newBullet.gun = gun;
+            
+            // Set position, rotation and size
+            newBullet.transform.position = firePoint.position;
+            newBullet.transform.localScale = new Vector3(size, size, size);
+            
+            // Calculation needed to get fan spread
+            // DOESNT WORK YET
+            // Spread gets narrower when looking straight up or down
+            var yRot = firePoint.rotation.eulerAngles.y - (spreadRange / 2) + (i * angle);
+            newBullet.transform.rotation = Quaternion.Euler(firePoint.rotation.eulerAngles.x, yRot, firePoint.rotation.eulerAngles.z);
+
+            newBullet.trail.Clear();
+        }
 
     }
 

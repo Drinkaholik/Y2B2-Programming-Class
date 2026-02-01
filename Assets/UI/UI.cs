@@ -17,7 +17,8 @@ public class UI : MonoBehaviour
     [SerializeField] private TMP_Text score;
     [SerializeField] private TMP_Text fps;
     
-    [SerializeField] private float smoothing = 0.1f;
+    [Tooltip("Higher means smoother, but also less accurate")]
+    [SerializeField] private float smoothing;
     private float smoothedFPS;
     
     private int _score;
@@ -40,8 +41,12 @@ public class UI : MonoBehaviour
     void Update()
     {
         // Show FPS
-        var actualFPS = 1/Time.deltaTime;
-        smoothedFPS = Mathf.Lerp(smoothedFPS, actualFPS, smoothing);
+        var actualFPS = 1/Time.unscaledDeltaTime;
+        // Needs to get smaller the larger the difference between 2 values is
+        // Should equal 1 if difference is enourmous, else should equal like 0.001 if they're very close
+        var dynamicSmoothing = Mathf.Abs(1 - (actualFPS / smoothedFPS)) / smoothing;
+        Debug.Log(dynamicSmoothing);
+        smoothedFPS = Mathf.Lerp(smoothedFPS, actualFPS, dynamicSmoothing);
         fps.text = $"FPS: {Mathf.RoundToInt(smoothedFPS)}";
     }
 

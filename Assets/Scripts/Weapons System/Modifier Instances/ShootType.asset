@@ -12,19 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 443e96d04d20b9647962cf63b8953aa2, type: 3}
   m_Name: ShootType
   m_EditorClassIdentifier: 
-  behaviour: 1
+  behaviour: 2
   damage: 11
-  fireRate: 1.74
-  speed: 100
-  size: 0.3
-  lifetime: 5
-  spawnedBullets: []
+  fireRate: 20.83
+  speed: 20
+  size: 0.1
+  lifetime: 2
   burstAmount: 3
-  burstDelay: 0.39
-  timer: 0.24284844
-  bullets: 2
-  angle: 90
-  maxAngle: 90
+  burstDelay: 0.08
+  bullets: 7
+  angle: 10
+  maxAngle: 25.714285
   totalSpread: 180
   pellets: 0
   spread: 116

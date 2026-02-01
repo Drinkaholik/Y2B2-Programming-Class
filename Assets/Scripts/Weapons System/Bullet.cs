@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
 
     public TrailRenderer trail;
 
-    void Start()
+    void Awake()
     {
         trail = GetComponent<TrailRenderer>();
     }
