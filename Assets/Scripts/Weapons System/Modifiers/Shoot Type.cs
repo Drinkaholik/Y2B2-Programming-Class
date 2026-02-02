@@ -49,9 +49,9 @@ public class ShootType : ScriptableObject
     public Coroutine Routine;
     
 
-    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, Gun gun)
+    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     {
-        yield return ChosenCreate(bulletPool, firePoint, gun);
+        yield return ChosenCreate(bulletPool, firePoint, gun, material);
         
         // Handle fireRate
         var waitTime = 1/fireRate;
@@ -62,32 +62,32 @@ public class ShootType : ScriptableObject
     }
     
     // Needs to be a coroutine os that I can yield return the BurstRoutine
-    IEnumerator ChosenCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    IEnumerator ChosenCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     {
         switch (behaviour)
         {
             case ShootBehaviour.Default:
-                DefaultCreate(bulletPool, firePoint, gun);
+                DefaultCreate(bulletPool, firePoint, gun, material);
                 yield return null;
                 break;
             
             case ShootBehaviour.Burst:
-                yield return BurstCreate(bulletPool, firePoint, gun);
+                yield return BurstCreate(bulletPool, firePoint, gun, material);
                 break;
             
             case ShootBehaviour.Multishot:
-                MultishotCreate(bulletPool, firePoint, gun);
+                MultishotCreate(bulletPool, firePoint, gun, material);
                 yield return null;
                 break;
             
             case ShootBehaviour.Grapeshot:
-                GrapeshotCreate(bulletPool, firePoint, gun);
+                GrapeshotCreate(bulletPool, firePoint, gun, material);
                 yield return null;
                 break;
         }
     }
 
-    void DefaultCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    void DefaultCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     {
         // Spawn from pool
         var newBullet = bulletPool.Spawn();
@@ -104,7 +104,7 @@ public class ShootType : ScriptableObject
     }
 
     // Shoots consecutive bullets in a rapid burst
-    IEnumerator BurstCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    IEnumerator BurstCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     { 
         for (int i = 0; i < burstAmount; i++)
         {
@@ -125,9 +125,8 @@ public class ShootType : ScriptableObject
     
 
     // Shoots multiple bullets in a fan shape
-    void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     {
-        var spreadRange = (bullets - 1) * angle; // Angle between leftmost and rightmost bullet
         var startAngle = -angle / 2f;
         
         var bulletSize = new Vector3(size, size, size); // Cache bullet size
@@ -137,14 +136,17 @@ public class ShootType : ScriptableObject
             var newBullet = bulletPool.Spawn();
             newBullet.gun = gun;
             
-            // Set position, rotation and size
+            // Set material
+            newBullet.rend.material = material;
+            newBullet.trail.material = material;
+            
+            // Set position and size
             newBullet.transform.position = firePoint.position;
             newBullet.transform.localScale = bulletSize;
             
             // Calculation needed to get fan spread
             var currentAngle = startAngle + (i * angle);
             var spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
-            
             newBullet.transform.rotation = firePoint.rotation * spreadRotation;
             
             //var yRot = firePoint.rotation.eulerAngles.y - (spreadRange / 2) + (i * angle);
@@ -156,7 +158,7 @@ public class ShootType : ScriptableObject
     }
 
     // Shoots multiple bullets in a 'shotgun' blast
-    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
+    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
     {
         
         

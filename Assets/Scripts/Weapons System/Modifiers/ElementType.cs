@@ -5,35 +5,75 @@ using UnityEngine;
 // Base is abstract
 
 [CreateAssetMenu(fileName = "ElementType", menuName = "Scriptable Objects/ElementType")]
-public abstract class ElementType : ScriptableObject
+public class ElementType : ScriptableObject
 {
-    public abstract void ApplyEffect(GameObject bullet, Collider other);
-}
+
+    public enum ElementBehaviour
+    {
+        Freeze,
+        Burn
+    }
+
+    public ElementBehaviour behaviour;
+    [HideInInspector] public Material elementMaterial;
+    
+    
+    [Header("Freeze Stats")]
+    [Tooltip("Amount to chill the target by. When they reach 100%, they freeze.")]
+    [HideInInspector] [SerializeField] private int freezeAmount;
+    [Tooltip("Defines gun and bullet colour.")]
+    [HideInInspector] [SerializeField] private Material freezeMaterial;
+    
+    [Header("Burn Stats")]
+    [Tooltip("Amount of time the target spends burning.")]
+    [HideInInspector] [SerializeField] private float burnDuration;
+    [Tooltip("Defines gun and bullet colour.")]
+    [HideInInspector] [SerializeField] private Material burnMaterial;
+
+    void OnEnable()
+    {
+        switch (behaviour)
+        {
+            case ElementBehaviour.Freeze:
+                elementMaterial = freezeMaterial;
+
+                break;
+            case ElementBehaviour.Burn:
+                elementMaterial = burnMaterial;
+
+                break;
+        }
+    }
+    
+    public void ApplyEffect(Collider other)
+    {
+        switch (behaviour)
+        {
+            case ElementBehaviour.Freeze:
+                ApplyFreeze(other);
+
+                break;
+            case ElementBehaviour.Burn:
+                ApplyBurn(other);
+
+                break;
+        }
+    }
 
 
-[CreateAssetMenu(fileName = "FreezeBullet", menuName = "Scriptable Objects/FreezeBullet")]
-public class FreezeBullet : ElementType
-{
     
-    [SerializeField] private int freezeAmount;
-    
-    public override void ApplyEffect(GameObject bullet, Collider other)
+
+    private void ApplyFreeze(Collider other)
     {
         // Apply freeze if applicable
         if (other.TryGetComponent(out IFreezable freezable))
             freezable.Freeze(freezeAmount);
-        
+
     }
-}
 
-
-[CreateAssetMenu(fileName = "BurnBullet", menuName = "Scriptable Objects/BurnBullet")]
-public class BurnBullet : ElementType
-{
-
-    [SerializeField] private float burnDuration;
     
-    public override void ApplyEffect(GameObject bullet, Collider other)
+
+    private void ApplyBurn(Collider other)
     {
         // Apply burn if applicable
         if (other.TryGetComponent(out IBurnable burnable))
@@ -41,5 +81,6 @@ public class BurnBullet : ElementType
             burnable.Burn(burnDuration);
         }
     }
-    
+
+
 }

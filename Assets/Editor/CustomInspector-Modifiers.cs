@@ -1,8 +1,10 @@
 using UnityEditor;
 using UnityEngine;
 
-// Custom editor script for ShootType
-// Hides / displays certain properties based on the ShootBehaviour enum
+// Custom editor script for bullet / gun modifiers
+// Hides / displays certain properties based on their enums
+
+
 
 [CustomEditor(typeof(ShootType))]
 public class ShootTypeEditor : Editor
@@ -41,8 +43,6 @@ public class ShootTypeEditor : Editor
         // Grapeshot props
         _pelletsProp = serializedObject.FindProperty("pellets");
         _spreadProp = serializedObject.FindProperty("spread");
-        
-        
     }
 
     public override void OnInspectorGUI()
@@ -91,8 +91,9 @@ public class ShootTypeEditor : Editor
         serializedObject.ApplyModifiedProperties();
         
     }
-    
 }
+
+
 
 [CustomEditor(typeof(MovementType))]
 public class MovementTypeEditor : Editor
@@ -139,6 +140,65 @@ public class MovementTypeEditor : Editor
                 break;
         }
         
+        // Apply any changes made in inspector
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+
+
+
+[CustomEditor(typeof(ElementType))]
+public class ElementTypeEditor : Editor
+{
+    // Enum
+    private SerializedProperty _behaviourProp;
+    
+    // Freeze props
+    private SerializedProperty _freezeAmountProp;
+    private SerializedProperty _freezeMaterialProp;
+    
+    // Burn props
+    private SerializedProperty _burnDurationProp;
+    private SerializedProperty _burnMaterialProp;
+    
+    
+    void OnEnable()
+    {
+        // Link properties //
+        // Enum
+        _behaviourProp = serializedObject.FindProperty("behaviour");
+        
+        // Freeze properties
+        _freezeAmountProp = serializedObject.FindProperty("freezeAmount");
+        _freezeMaterialProp = serializedObject.FindProperty("freezeMaterial");
+        
+        // Burn properties
+        _burnDurationProp = serializedObject.FindProperty("burnDuration");
+        _burnMaterialProp = serializedObject.FindProperty("burnMaterial");
+        
+    }
+
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+        
+        DrawDefaultInspector();
+
+        switch (_behaviourProp.enumValueIndex)
+        {
+            case (int)ElementType.ElementBehaviour.Freeze:
+                EditorGUILayout.PropertyField(_freezeAmountProp);
+                EditorGUILayout.PropertyField(_freezeMaterialProp);  
+                
+                break;
+            
+            case (int)ElementType.ElementBehaviour.Burn:
+                EditorGUILayout.PropertyField(_burnDurationProp);
+                EditorGUILayout.PropertyField(_burnMaterialProp); 
+
+                break;
+        }
         
         // Apply any changes made in inspector
         serializedObject.ApplyModifiedProperties();

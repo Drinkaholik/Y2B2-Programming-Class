@@ -20,11 +20,11 @@ public class EffectType : ScriptableObject
     
     [Header("PierceStats")] 
     [Tooltip("Number of enemies it will pierce before despawning")]
-    public int pierce;
+    [HideInInspector] public int pierce;
 
     [Header("BounceStats")] 
     [Tooltip("Number of times it will bounce before despawning")]
-    public int bounciness;
+    [HideInInspector] public int bounciness;
 
 
 

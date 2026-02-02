@@ -10,7 +10,7 @@ public class BulletPool : MonoBehaviour
     
     [SerializeField] private int poolSize;
 
-    private Queue<Bullet> bulletPool = new();
+    private Queue<Bullet> _bulletPool = new();
     
     void Start()
     {
@@ -24,7 +24,7 @@ public class BulletPool : MonoBehaviour
         {
             var bullet = Instantiate(bulletPrefab).GetComponent<Bullet>();
             
-            bulletPool.Enqueue(bullet);
+            _bulletPool.Enqueue(bullet);
             bullet.transform.SetParent(transform); // Keeps the hierarchy cleaner - all bullets are under the controller
             bullet.gameObject.SetActive(false);
         }
@@ -33,9 +33,9 @@ public class BulletPool : MonoBehaviour
     public Bullet Spawn()
     {
         // Add more bullets to pool if you run out - just in case
-        if (bulletPool.Count == 0) InstantiateToPool(1);
+        if (_bulletPool.Count == 0) InstantiateToPool(1);
         
-        var bullet = bulletPool.Dequeue();
+        var bullet = _bulletPool.Dequeue();
         bullet.gameObject.SetActive(true);
         
         return bullet;
@@ -44,7 +44,7 @@ public class BulletPool : MonoBehaviour
 
     public void Return(Bullet bullet)
     {
-        bulletPool.Enqueue(bullet);
+        _bulletPool.Enqueue(bullet);
         bullet.gameObject.SetActive(false);
     }
     

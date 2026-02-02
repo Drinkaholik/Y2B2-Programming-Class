@@ -12,10 +12,22 @@ public class Bullet : MonoBehaviour
 
     public TrailRenderer trail;
 
-    void Awake()
+    private Renderer _rend;
+    public Renderer rend
+    {
+        get
+        {
+            if (_rend == null) _rend = GetComponent<Renderer>();
+            return _rend;
+        }
+    }
+
+    void Start()
     {
         trail = GetComponent<TrailRenderer>();
+        _rend = GetComponent<Renderer>();
     }
+    
     
     void Update()
     {
@@ -51,7 +63,9 @@ public class Bullet : MonoBehaviour
     {
         var rayDir = transform.TransformDirection(gun.moveType.moveDir);
         var rayLength = gun.shootType.speed * Time.deltaTime;
-        Debug.DrawRay(transform.position, rayDir * (rayLength * 10), Color.red, 1f);
+        
+        //Debug.DrawRay(transform.position, rayDir * (rayLength * 10), Color.red, 1f);
+        
         if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayLength))
         {
             transform.position = hit.point;
@@ -78,7 +92,7 @@ public class Bullet : MonoBehaviour
         // Apply elemental effect
         if (gun.elementType != null)
         {
-            gun.elementType.ApplyEffect(gameObject, other);
+            gun.elementType.ApplyEffect(other);
         }
         
         ReturnToPool();
