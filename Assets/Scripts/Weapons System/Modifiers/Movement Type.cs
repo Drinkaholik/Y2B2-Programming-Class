@@ -9,6 +9,7 @@ public class MovementType : ScriptableObject
 {
     
     private float _lifetime;
+    [HideInInspector] public Vector3 moveDir;
 
     public enum MoveBehaviour
     {
@@ -51,7 +52,9 @@ public class MovementType : ScriptableObject
 
     private void DefaultMove(GameObject bullet, float speed)
     {
-        bullet.transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+        moveDir = Vector3.forward;
+        
+        bullet.transform.Translate(moveDir * (speed * Time.deltaTime));
     }
 
     private void SidewindMove(GameObject bullet, float speed, float timeLived)
@@ -71,7 +74,7 @@ public class MovementType : ScriptableObject
         var sin = amplitude * Mathf.Sin((2 * Mathf.PI * timeLived * frequency) + (0.5f * Mathf.PI));
         
         // Apply movement
-        var moveDir = (Vector3.forward + (_direction * sin)).normalized;
+        moveDir = (Vector3.forward + (_direction * sin)).normalized;
         bullet.transform.Translate( moveDir * (speed * Time.deltaTime));
         
     }

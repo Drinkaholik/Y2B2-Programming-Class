@@ -23,12 +23,47 @@ public class Bullet : MonoBehaviour
         
         CheckLifetime();
         gun.moveType.Move(gameObject, gun.shootType.speed, _timeLived);
+        CollisionCheck();
     }
     
     
 
+    
+    
+    // Despawn if in scene for too long
+    private void CheckLifetime()
+    {
+        if (_timeLived >= gun.shootType.lifetime)
+        {
+            _timeLived = 0;
+            ReturnToPool();
+        }
+        
+    }
+
+    void ReturnToPool()
+    {
+        gun.bulletPool.Return(this);
+    }
+
+
+    void CollisionCheck()
+    {
+        var rayDir = transform.TransformDirection(gun.moveType.moveDir);
+        var rayLength = gun.shootType.speed * Time.deltaTime;
+        Debug.DrawRay(transform.position, rayDir * (rayLength * 10), Color.red, 1f);
+        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayLength))
+        {
+            transform.position = hit.point;
+            
+            OnHit(hit.collider);
+        }
+        
+    }
+    
+    
     // On hit
-    void OnTriggerEnter(Collider other)
+    void OnHit(Collider other)
     {
         // Apply damage
         gun.shootType.OnHit(other);
@@ -48,22 +83,6 @@ public class Bullet : MonoBehaviour
         
         ReturnToPool();
         
-    }
-    
-    // Despawn if in scene for too long
-    private void CheckLifetime()
-    {
-        if (_timeLived >= gun.shootType.lifetime)
-        {
-            _timeLived = 0;
-            ReturnToPool();
-        }
-        
-    }
-
-    void ReturnToPool()
-    {
-        gun.bulletPool.Return(this);
     }
     
     

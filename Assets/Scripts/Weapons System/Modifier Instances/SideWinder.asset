@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a5cf9a726bf01a4faece0503cc754c7, type: 3}
   m_Name: SideWinder
   m_EditorClassIdentifier: Assembly-CSharp::SideWinder
-  behaviour: 0
+  moveDir: {x: 0.23337294, y: 0, z: 0.97238725}
+  behaviour: 1
   amplitude: 0.24
   frequency: 4.87
   orientation: 0

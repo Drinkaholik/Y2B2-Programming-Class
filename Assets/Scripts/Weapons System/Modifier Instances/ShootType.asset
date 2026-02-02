@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behaviour: 2
   damage: 11
-  fireRate: 20.83
-  speed: 20
+  fireRate: 40
+  speed: 10
   size: 0.1
   lifetime: 2
   burstAmount: 3
   burstDelay: 0.08
-  bullets: 7
-  angle: 10
-  maxAngle: 25.714285
+  bullets: 20
+  angle: 1.7
+  maxAngle: 9
   totalSpread: 180
   pellets: 0
   spread: 116

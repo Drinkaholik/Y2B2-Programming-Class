@@ -42,10 +42,10 @@ public class UI : MonoBehaviour
     {
         // Show FPS
         var actualFPS = 1/Time.unscaledDeltaTime;
-        // Needs to get smaller the larger the difference between 2 values is
-        // Should equal 1 if difference is enourmous, else should equal like 0.001 if they're very close
+        
+        // Smaller value means smoother
         var dynamicSmoothing = Mathf.Abs(1 - (actualFPS / smoothedFPS)) / smoothing;
-        Debug.Log(dynamicSmoothing);
+        //Debug.Log(dynamicSmoothing);
         smoothedFPS = Mathf.Lerp(smoothedFPS, actualFPS, dynamicSmoothing);
         fps.text = $"FPS: {Mathf.RoundToInt(smoothedFPS)}";
     }

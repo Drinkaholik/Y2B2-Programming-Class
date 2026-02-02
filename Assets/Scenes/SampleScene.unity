@@ -2260,7 +2260,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &865210632
 Transform:
   m_ObjectHideFlags: 0
@@ -2458,7 +2458,7 @@ TrailRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986546750}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -3434,7 +3434,7 @@ GameObject:
   m_IsActive: 1
 --- !u!114 &1589441956
 MonoBehaviour:
-  m_ObjectHideFlags: 10
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -3722,7 +3722,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 6146125585879475677, guid: 38c150c85abff2c47a3c6bc37a43a66d, type: 3}
-  poolSize: 40
+  poolSize: 10000
 --- !u!1 &1750423124
 GameObject:
   m_ObjectHideFlags: 0
@@ -4069,7 +4069,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1814000611
 MonoBehaviour:
   m_ObjectHideFlags: 10
@@ -4329,7 +4329,7 @@ MonoBehaviour:
   UIDoc: {fileID: 1827591823}
   score: {fileID: 267169778}
   fps: {fileID: 295595228}
-  smoothing: 5
+  smoothing: 40
 --- !u!114 &1827591823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4864,6 +4864,10 @@ PrefabInstance:
     - target: {fileID: 8992962231614778064, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
       propertyPath: m_Name
       value: TestTurret
+      objectReference: {fileID: 0}
+    - target: {fileID: 8992962231614778064, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

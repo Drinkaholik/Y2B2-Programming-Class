@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 // Holds info and methods for gun/bullet shooting behaviour
@@ -40,8 +38,7 @@ public class ShootType : ScriptableObject
     [Header("Multishot Stats")] 
     [HideInInspector] [Min(1)] public int bullets;
     [HideInInspector] [SerializeField] private float angle;
-    // Necessary for a dynamically updated max angle
-    [HideInInspector] public float maxAngle;
+    [HideInInspector] public float maxAngle; // Necessary for dynamically updating slider
     [HideInInspector] public float totalSpread = 180f;
     
     
@@ -130,7 +127,11 @@ public class ShootType : ScriptableObject
     // Shoots multiple bullets in a fan shape
     void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun)
     {
-        var spreadRange = (bullets - 1) * angle;
+        var spreadRange = (bullets - 1) * angle; // Angle between leftmost and rightmost bullet
+        var startAngle = -angle / 2f;
+        
+        var bulletSize = new Vector3(size, size, size); // Cache bullet size
+        
         for (int i = 0; i < bullets; i++)
         {
             var newBullet = bulletPool.Spawn();
@@ -138,13 +139,16 @@ public class ShootType : ScriptableObject
             
             // Set position, rotation and size
             newBullet.transform.position = firePoint.position;
-            newBullet.transform.localScale = new Vector3(size, size, size);
+            newBullet.transform.localScale = bulletSize;
             
             // Calculation needed to get fan spread
-            // DOESNT WORK YET
-            // Spread gets narrower when looking straight up or down
-            var yRot = firePoint.rotation.eulerAngles.y - (spreadRange / 2) + (i * angle);
-            newBullet.transform.rotation = Quaternion.Euler(firePoint.rotation.eulerAngles.x, yRot, firePoint.rotation.eulerAngles.z);
+            var currentAngle = startAngle + (i * angle);
+            var spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
+            
+            newBullet.transform.rotation = firePoint.rotation * spreadRotation;
+            
+            //var yRot = firePoint.rotation.eulerAngles.y - (spreadRange / 2) + (i * angle);
+            //newBullet.transform.rotation = Quaternion.Euler(firePoint.rotation.eulerAngles.x, yRot, firePoint.rotation.eulerAngles.z);
 
             newBullet.trail.Clear();
         }

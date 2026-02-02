@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,9 +9,9 @@ public class Kick : MonoBehaviour
     [SerializeField] private float kickForce;
 
     
-    private Vector3 kickPoint = new(0, -1, 0);
+    private Vector3 _kickPoint = new(0, -1, 0);
     
-    private List<GameObject> kickable = new();
+    private List<GameObject> _kickable = new();
     
     private InputAction _kickAction;
     
@@ -36,12 +37,15 @@ public class Kick : MonoBehaviour
 
     private void KickObjects()
     {
+        // Incase object is destroyed before leaving kickZone
+        _kickable.RemoveAll(item => item == null);
+        
         // Loop through kickable list
-        foreach (var obj in kickable)
+        foreach (var obj in _kickable)
         {
             if (obj.TryGetComponent<Rigidbody>(out Rigidbody rb))
             {
-                var kickDir = Vector3.Normalize(rb.position - (transform.position + kickPoint));
+                var kickDir = Vector3.Normalize(rb.position - (transform.position + _kickPoint));
             
                 rb.AddForce(kickDir * kickForce);
             }
@@ -53,13 +57,13 @@ public class Kick : MonoBehaviour
     // Add rigidbodies to list if they enter kick zone
     void OnTriggerEnter(Collider other)
     {
-        kickable.Add(other.gameObject);
+        _kickable.Add(other.gameObject);
     }
     
     // Remove if they exit kickzone
     void OnTriggerExit(Collider other)
     {
-        kickable.Remove(other.gameObject);
+        _kickable.Remove(other.gameObject);
     }
     
 }
