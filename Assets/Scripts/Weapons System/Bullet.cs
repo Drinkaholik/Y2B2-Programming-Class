@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // Moves bullet, handles collisions, and checks lifetime
@@ -8,7 +9,10 @@ public class Bullet : MonoBehaviour
     
     private float _timeLived;
 
-    [HideInInspector] public Gun gun;
+    [HideInInspector] public ShootType shootType;
+    [HideInInspector] public MoveType moveType;
+    public List<EffectType> effects;
+    [HideInInspector] public ElementType elementType;
 
     public TrailRenderer trail;
 
@@ -34,7 +38,7 @@ public class Bullet : MonoBehaviour
         _timeLived += Time.deltaTime; // Needed for sidewind movement and lifetime check
         
         CheckLifetime();
-        gun.moveType.Move(gameObject, gun.shootType.speed, _timeLived);
+        moveType.Move(gameObject, shootType.speed, _timeLived);
         CollisionCheck();
     }
     
@@ -45,7 +49,7 @@ public class Bullet : MonoBehaviour
     // Despawn if in scene for too long
     private void CheckLifetime()
     {
-        if (_timeLived >= gun.shootType.lifetime)
+        if (_timeLived >= shootType.lifetime)
         {
             _timeLived = 0;
             ReturnToPool();
@@ -55,14 +59,14 @@ public class Bullet : MonoBehaviour
 
     void ReturnToPool()
     {
-        gun.bulletPool.Return(this);
+        BulletPool.Return(this);
     }
 
 
     void CollisionCheck()
     {
-        var rayDir = transform.TransformDirection(gun.moveType.moveDir);
-        var rayLength = gun.shootType.speed * Time.deltaTime;
+        var rayDir = transform.TransformDirection(moveType.moveDir);
+        var rayLength = shootType.speed * Time.deltaTime;
         
         //Debug.DrawRay(transform.position, rayDir * (rayLength * 10), Color.red, 1f);
         
@@ -80,19 +84,19 @@ public class Bullet : MonoBehaviour
     void OnHit(Collider other)
     {
         // Apply damage
-        gun.shootType.OnHit(other);
+        shootType.OnHit(other);
         
         // Apply effects
-        foreach (EffectType fx in gun.effects)
+        foreach (EffectType fx in effects)
         {
             fx.OnHit(gameObject, other);
         }
         
         
         // Apply elemental effect
-        if (gun.elementType != null)
+        if (elementType != null)
         {
-            gun.elementType.ApplyEffect(other);
+            elementType.ApplyEffect(other);
         }
         
         ReturnToPool();

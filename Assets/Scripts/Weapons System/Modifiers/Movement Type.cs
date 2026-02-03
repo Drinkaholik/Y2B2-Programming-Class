@@ -1,11 +1,10 @@
 using UnityEngine;
 
-// Holds info and methods for bullet movement
+// Holds data and methods for bullet movement
 // All movement types are mutually exclusive
-// Base is instantiable
     
 [CreateAssetMenu(fileName = "MovementType", menuName = "Scriptable Objects/MovementType")]
-public class MovementType : ScriptableObject
+public class MoveType : ScriptableObject
 {
     
     private float _lifetime;

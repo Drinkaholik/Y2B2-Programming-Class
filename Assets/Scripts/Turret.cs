@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using DevScripts;
 using UnityEngine;
 
@@ -13,12 +14,18 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private GameObject platform;
     [SerializeField] private GameObject barrel;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private GameObject bullet;
+
+    [Header("Modifiers")] // HEADER
+    [SerializeField] private ShootType shootType;
+    [SerializeField] private MoveType moveType;
+    [SerializeField] private List<EffectType> effectType;
+    [SerializeField] private ElementType elementType;
     
     private float _playerDistance;
     private Vector3 _playerDir;
     private bool _obstructed;
-    private WaitForSeconds _patrolWait;
+    
+    
     
     
     [Header("Combat")] // HEADER
@@ -27,10 +34,14 @@ public class Turret : MonoBehaviour, IDamageable
     
     [Tooltip("Bullets per second")] 
     [SerializeField] private float fireRate;
-    private float _fireTimer;
+    private Coroutine _shootRoutine;
+    private WaitForSeconds _shootWait;
     
+    [Tooltip("Range at which turret enters ready state")] 
     [SerializeField] private float detectRange;
+    [Tooltip("Range at which turret begins attacking")] 
     [SerializeField] private float attackRange;
+    
     
     
     [Header("Patrol")] // HEADER
@@ -43,6 +54,7 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float patrolAngle;
     
     private Coroutine _patrolRoutine;
+    private WaitForSeconds _patrolWait;
     
     
     [Header("Turning")] // HEADER
@@ -57,7 +69,9 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float maxAngle;
     
     
+    
     [Header("SFX")] // HEADER
+    
     
     
     [Header("VFX")] // HEADER
@@ -82,8 +96,9 @@ public class Turret : MonoBehaviour, IDamageable
     void Start()
     {
         _patrolWait = new WaitForSeconds(waitTime);
-        _muzzleVFXSize = new Vector3(muzzleVFXSize, muzzleVFXSize, muzzleVFXSize);
+        _shootWait = new WaitForSeconds(1/fireRate);
         
+        _muzzleVFXSize = new Vector3(muzzleVFXSize, muzzleVFXSize, muzzleVFXSize);
     }
     
     void Update()
@@ -270,7 +285,11 @@ public class Turret : MonoBehaviour, IDamageable
     {
         PlatformRotate();
         BarrelRotate();
-        Shoot();
+        if (_shootRoutine != null)
+        {
+            _shootRoutine = StartCoroutine(Shoot());
+        }
+        
         
         // Transition to ready state
         if (_playerDistance > attackRange || _obstructed)
@@ -311,22 +330,22 @@ public class Turret : MonoBehaviour, IDamageable
         barrel.transform.localRotation = Quaternion.Euler(clampedAngle, 0, 0);
     }
 
-    void Shoot()
+    IEnumerator Shoot()
     {
-        _fireTimer += Time.deltaTime;
         
-        
-        if (_fireTimer >= 1/fireRate)
+        // Muzzle VFX
+        var vfx = Instantiate(muzzleVFX, firePoint.position, firePoint.rotation);
+        vfx.transform.parent = firePoint.transform;
+        vfx.transform.localScale = _muzzleVFXSize;
+        Destroy(vfx, 1);
+
+        if (shootType.Routine != null)
         {
-            // Muzzle VFX
-            var vfx = Instantiate(muzzleVFX, firePoint.position, firePoint.rotation);
-            vfx.transform.parent = firePoint.transform;
-            vfx.transform.localScale = _muzzleVFXSize;
-            Destroy(vfx, 1);
-            
-            Instantiate(bullet, firePoint.position, firePoint.rotation);
-            _fireTimer = 0;
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effectType, elementType));
         }
+        
+        yield return _shootWait;
+
     }
 
 

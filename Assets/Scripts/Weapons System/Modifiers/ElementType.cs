@@ -1,8 +1,7 @@
 using UnityEngine;
 
-// Holds info and methods for the bullet elements
+// Holds data and methods for the bullet elements
 // All elements are mutually exclusive
-// Base is abstract
 
 [CreateAssetMenu(fileName = "ElementType", menuName = "Scriptable Objects/ElementType")]
 public class ElementType : ScriptableObject
@@ -15,31 +14,36 @@ public class ElementType : ScriptableObject
     }
 
     public ElementBehaviour behaviour;
-    [HideInInspector] public Material elementMaterial;
-    
+    [HideInInspector] public Material material;
+    [HideInInspector] public Material trailMaterial;
     
     [Header("Freeze Stats")]
     [Tooltip("Amount to chill the target by. When they reach 100%, they freeze.")]
     [HideInInspector] [SerializeField] private int freezeAmount;
     [Tooltip("Defines gun and bullet colour.")]
     [HideInInspector] [SerializeField] private Material freezeMaterial;
+    [HideInInspector] [SerializeField] private Material freezeTrailMaterial;
     
     [Header("Burn Stats")]
     [Tooltip("Amount of time the target spends burning.")]
     [HideInInspector] [SerializeField] private float burnDuration;
     [Tooltip("Defines gun and bullet colour.")]
     [HideInInspector] [SerializeField] private Material burnMaterial;
-
+    [HideInInspector] [SerializeField] private Material burnTrailMaterial;
+    
+    // Set materials
     void OnEnable()
     {
         switch (behaviour)
         {
             case ElementBehaviour.Freeze:
-                elementMaterial = freezeMaterial;
+                material = freezeMaterial;
+                trailMaterial  = freezeTrailMaterial;
 
                 break;
             case ElementBehaviour.Burn:
-                elementMaterial = burnMaterial;
+                material = burnMaterial;
+                trailMaterial  = burnTrailMaterial;
 
                 break;
         }

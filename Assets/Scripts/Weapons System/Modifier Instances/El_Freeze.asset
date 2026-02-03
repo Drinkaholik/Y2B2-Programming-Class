@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85c9d744bae6e604ca0ce4f73508db6f, type: 3}
-  m_Name: ElementType
+  m_Name: El_Freeze
   m_EditorClassIdentifier: 
   behaviour: 0
   elementMaterial: {fileID: 2100000, guid: 994a130f2efbba04bae500edde535c06, type: 2}

@@ -10,12 +10,11 @@ public class Gun : MonoBehaviour
 
     [Header("Combat")] 
     [SerializeField] private Transform firePoint;
-    public BulletPool bulletPool;
     
     [Header("Modifiers")] 
     public ShootType shootType;
-    public MovementType moveType;
-    public HashSet<EffectType> effects = new();
+    public MoveType moveType;
+    public List<EffectType> effects = new();
     public ElementType elementType;
 
 
@@ -37,33 +36,43 @@ public class Gun : MonoBehaviour
         
         _renderer = GetComponent<Renderer>();
         _materials = _renderer.materials;
-        _currentMat = elementType.elementMaterial;
+        _currentMat = elementType.material;
     }
     
     
     void Update()
     {
         Shoot();
+        
+        // Temp, delete once pickup system works
+        if (_renderer.materials[2] != elementType.material)
+        {
+            _currentMat = elementType.material;
+            _materials[2] = _currentMat;
+            _renderer.materials  = _materials;
+        }
+            
+        
     }
 
     void Shoot()
     {
         if (_tryingShoot && shootType.Routine == null)
         {
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(bulletPool,firePoint, this, _currentMat));
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effects, elementType));
         }
             
     }
 
-    void OnPickup()
+    public void OnPickup(ElementType element)
     {
+        elementType = element;
         
-        if (elementType != null)
-        {
-            _currentMat = elementType.elementMaterial;
-            _materials[2] = _currentMat;
-            _renderer.materials  = _materials;
-        }
+        // Set material - have to replace entire array, kinda cringe
+        _currentMat = elementType.material;
+        _materials[2] = _currentMat;
+        _renderer.materials  = _materials;
+        
     }
     
     

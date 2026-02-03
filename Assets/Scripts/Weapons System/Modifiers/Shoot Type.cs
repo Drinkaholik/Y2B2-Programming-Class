@@ -1,7 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-// Holds info and methods for gun/bullet shooting behaviour
+// Holds data and methods for gun/bullet shooting behaviour
 // All shoot types are mutually exclusive
 
 [CreateAssetMenu(fileName = "ShootType", menuName = "Scriptable Objects/ShootType")]
@@ -49,9 +50,9 @@ public class ShootType : ScriptableObject
     public Coroutine Routine;
     
 
-    public IEnumerator ShootRoutine(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    public IEnumerator ShootRoutine(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
-        yield return ChosenCreate(bulletPool, firePoint, gun, material);
+        yield return ChosenCreate(firePoint, shootType, moveType, effects, elementType);
         
         // Handle fireRate
         var waitTime = 1/fireRate;
@@ -62,36 +63,45 @@ public class ShootType : ScriptableObject
     }
     
     // Needs to be a coroutine os that I can yield return the BurstRoutine
-    IEnumerator ChosenCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    IEnumerator ChosenCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         switch (behaviour)
         {
             case ShootBehaviour.Default:
-                DefaultCreate(bulletPool, firePoint, gun, material);
+                DefaultCreate(firePoint, shootType, moveType, effects, elementType);
                 yield return null;
                 break;
             
             case ShootBehaviour.Burst:
-                yield return BurstCreate(bulletPool, firePoint, gun, material);
+                yield return BurstCreate(firePoint, shootType, moveType, effects, elementType);
                 break;
             
             case ShootBehaviour.Multishot:
-                MultishotCreate(bulletPool, firePoint, gun, material);
+                MultishotCreate(firePoint, shootType, moveType, effects, elementType);
                 yield return null;
                 break;
             
             case ShootBehaviour.Grapeshot:
-                GrapeshotCreate(bulletPool, firePoint, gun, material);
+                GrapeshotCreate(firePoint, shootType, moveType, effects, elementType);
                 yield return null;
                 break;
         }
     }
 
-    void DefaultCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    void DefaultCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         // Spawn from pool
-        var newBullet = bulletPool.Spawn();
-        newBullet.gun = gun;
+        var newBullet = BulletPool.Spawn();
+        
+        // Set modifiers
+        newBullet.shootType = shootType;
+        newBullet.moveType = moveType;
+        newBullet.effects = effects;
+        newBullet.elementType = elementType;
+        
+        // Set materials
+        newBullet.rend.material = elementType.material;
+        newBullet.trail.material = elementType.trailMaterial;
         
         // Set position, rotation and size
         newBullet.transform.position = firePoint.position;
@@ -104,13 +114,22 @@ public class ShootType : ScriptableObject
     }
 
     // Shoots consecutive bullets in a rapid burst
-    IEnumerator BurstCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    IEnumerator BurstCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     { 
         for (int i = 0; i < burstAmount; i++)
         {
             // Spawn from pool
-            var newBullet = bulletPool.Spawn();
-            newBullet.gun = gun;
+            var newBullet = BulletPool.Spawn();
+            
+            // Set modifiers
+            newBullet.shootType = shootType;
+            newBullet.moveType = moveType;
+            newBullet.effects = effects;
+            newBullet.elementType = elementType;
+            
+            // Set materials
+            newBullet.rend.material = elementType.material;
+            newBullet.trail.material = elementType.trailMaterial;
             
             // Set position, rotation and size
             newBullet.transform.position = firePoint.position;
@@ -125,7 +144,7 @@ public class ShootType : ScriptableObject
     
 
     // Shoots multiple bullets in a fan shape
-    void MultishotCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    void MultishotCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         var startAngle = -angle / 2f;
         
@@ -133,12 +152,17 @@ public class ShootType : ScriptableObject
         
         for (int i = 0; i < bullets; i++)
         {
-            var newBullet = bulletPool.Spawn();
-            newBullet.gun = gun;
+            var newBullet = BulletPool.Spawn();
             
-            // Set material
-            newBullet.rend.material = material;
-            newBullet.trail.material = material;
+            // Set modifiers
+            newBullet.shootType = shootType;
+            newBullet.moveType = moveType;
+            newBullet.effects = effects;
+            newBullet.elementType = elementType;
+            
+            // Set materials
+            newBullet.rend.material = elementType.material;
+            newBullet.trail.material = elementType.trailMaterial;
             
             // Set position and size
             newBullet.transform.position = firePoint.position;
@@ -149,16 +173,13 @@ public class ShootType : ScriptableObject
             var spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
             newBullet.transform.rotation = firePoint.rotation * spreadRotation;
             
-            //var yRot = firePoint.rotation.eulerAngles.y - (spreadRange / 2) + (i * angle);
-            //newBullet.transform.rotation = Quaternion.Euler(firePoint.rotation.eulerAngles.x, yRot, firePoint.rotation.eulerAngles.z);
-
             newBullet.trail.Clear();
         }
 
     }
 
     // Shoots multiple bullets in a 'shotgun' blast
-    void GrapeshotCreate(BulletPool bulletPool, Transform firePoint, Gun gun, Material material)
+    void GrapeshotCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         
         

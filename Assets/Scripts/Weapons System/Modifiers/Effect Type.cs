@@ -1,8 +1,7 @@
 using UnityEngine;
 
-// Holds info and methods for the bullet effects
+// Holds data and methods for the bullet effects
 // All effects can be joined in any combination
-// Base is abstract
 
 [CreateAssetMenu(fileName = "EffectType", menuName = "Scriptable Objects/EffectType")]
 public class EffectType : ScriptableObject

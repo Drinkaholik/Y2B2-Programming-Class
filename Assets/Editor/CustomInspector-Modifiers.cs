@@ -95,7 +95,7 @@ public class ShootTypeEditor : Editor
 
 
 
-[CustomEditor(typeof(MovementType))]
+[CustomEditor(typeof(MoveType))]
 public class MovementTypeEditor : Editor
 {
     // Enum
@@ -127,14 +127,14 @@ public class MovementTypeEditor : Editor
 
         switch (_behaviourProp.enumValueIndex)
         {
-            case (int)MovementType.MoveBehaviour.Sidewind:
+            case (int)MoveType.MoveBehaviour.Sidewind:
                 EditorGUILayout.PropertyField(_amplitudeProp);
                 EditorGUILayout.PropertyField(_frequencyProp);  
                 EditorGUILayout.PropertyField(_orientationProp);
                 
                 break;
             
-            case (int)MovementType.MoveBehaviour.Spiral:
+            case (int)MoveType.MoveBehaviour.Spiral:
                 
 
                 break;

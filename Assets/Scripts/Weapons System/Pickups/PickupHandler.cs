@@ -10,7 +10,7 @@ public class PickupHandler : MonoBehaviour
     public static HashSet<EffectType> BulletEffects;
     
     // Defines bullet movement type
-    public static MovementType MovementType;
+    public static MoveType MoveType;
 
     public static ElementType ElementType;
 
