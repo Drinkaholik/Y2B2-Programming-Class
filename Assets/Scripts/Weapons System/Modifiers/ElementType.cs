@@ -4,18 +4,24 @@ using UnityEngine;
 // All elements are mutually exclusive
 
 [CreateAssetMenu(fileName = "ElementType", menuName = "Scriptable Objects/ElementType")]
-public class ElementType : ScriptableObject
+public class ElementType : ModifierType
 {
 
     public enum ElementBehaviour
     {
+        None,
         Freeze,
         Burn
     }
-
+    
+    // HideInInspector is necessary for the custom inspector script
     public ElementBehaviour behaviour;
     [HideInInspector] public Material material;
     [HideInInspector] public Material trailMaterial;
+    
+    [Header("Default Stats")]
+    [HideInInspector] public Material baseMaterial;
+    [HideInInspector] public Material baseTrailMaterial;
     
     [Header("Freeze Stats")]
     [Tooltip("Amount to chill the target by. When they reach 100%, they freeze.")]
@@ -36,6 +42,11 @@ public class ElementType : ScriptableObject
     {
         switch (behaviour)
         {
+            case ElementBehaviour.None:
+                material = baseMaterial;
+                trailMaterial = baseTrailMaterial;
+                
+                break;
             case ElementBehaviour.Freeze:
                 material = freezeMaterial;
                 trailMaterial  = freezeTrailMaterial;
@@ -63,8 +74,7 @@ public class ElementType : ScriptableObject
                 break;
         }
     }
-
-
+    
     
 
     private void ApplyFreeze(Collider other)
@@ -72,10 +82,7 @@ public class ElementType : ScriptableObject
         // Apply freeze if applicable
         if (other.TryGetComponent(out IFreezable freezable))
             freezable.Freeze(freezeAmount);
-
     }
-
-    
 
     private void ApplyBurn(Collider other)
     {

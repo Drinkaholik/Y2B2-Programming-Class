@@ -66,7 +66,7 @@ public class Bullet : MonoBehaviour
     void CollisionCheck()
     {
         var rayDir = transform.TransformDirection(moveType.moveDir);
-        var rayLength = shootType.speed * Time.deltaTime;
+        var rayLength = (shootType.speed * Time.deltaTime) + 0.1f; // Need buffer to prevent tunnelling
         
         //Debug.DrawRay(transform.position, rayDir * (rayLength * 10), Color.red, 1f);
         

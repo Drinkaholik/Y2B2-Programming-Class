@@ -6,9 +6,11 @@ public class ex : MonoBehaviour
     private CharacterController cc;
     private float depth;
     
+    
     void Start()
     {
         cc = GetComponent<CharacterController>();
+        
     }
 
     // Update is called once per frame

@@ -4,7 +4,7 @@ using UnityEngine;
 // All effects can be joined in any combination
 
 [CreateAssetMenu(fileName = "EffectType", menuName = "Scriptable Objects/EffectType")]
-public class EffectType : ScriptableObject
+public class EffectType : ModifierType
 {
     
     public enum EffectBehaviour

@@ -16,13 +16,13 @@ public class ShootTypeEditor : Editor
     private SerializedProperty _burstAmountProp;
     private SerializedProperty _burstDelayProp;
     
-    // Multishot props
+    // Spreadshot props
     private SerializedProperty _bulletsProp;
     private SerializedProperty _angleProp;
     private float _dynamicMax;
+    private SerializedProperty _spreadOrientation;
     
     // Grapeshot props
-    private SerializedProperty _pelletsProp;
     private SerializedProperty _spreadProp;
 
 
@@ -39,9 +39,9 @@ public class ShootTypeEditor : Editor
         // Multishot props
         _bulletsProp = serializedObject.FindProperty("bullets");
         _angleProp = serializedObject.FindProperty("angle");
+        _spreadOrientation = serializedObject.FindProperty("spreadOrientation");
         
         // Grapeshot props
-        _pelletsProp = serializedObject.FindProperty("pellets");
         _spreadProp = serializedObject.FindProperty("spread");
     }
 
@@ -64,9 +64,9 @@ public class ShootTypeEditor : Editor
                 break;
 
             
-            case (int)ShootType.ShootBehaviour.Multishot:
+            case (int)ShootType.ShootBehaviour.Spreadshot:
                 EditorGUILayout.PropertyField(_bulletsProp);
-                
+                EditorGUILayout.PropertyField(_spreadOrientation);
                 
                 instance.maxAngle = instance.totalSpread / instance.bullets;
                 
@@ -82,7 +82,7 @@ public class ShootTypeEditor : Editor
             
             
             case (int)ShootType.ShootBehaviour.Grapeshot:
-                EditorGUILayout.PropertyField(_pelletsProp);
+                EditorGUILayout.PropertyField(_bulletsProp);
                 EditorGUILayout.PropertyField(_spreadProp);
                 break;
         }
@@ -92,7 +92,6 @@ public class ShootTypeEditor : Editor
         
     }
 }
-
 
 
 [CustomEditor(typeof(MoveType))]
@@ -146,20 +145,25 @@ public class MovementTypeEditor : Editor
 }
 
 
-
 [CustomEditor(typeof(ElementType))]
 public class ElementTypeEditor : Editor
 {
     // Enum
     private SerializedProperty _behaviourProp;
     
+    // Default props
+    private SerializedProperty _baseMaterialProp;
+    private SerializedProperty _baseTrailMaterialProp;
+    
     // Freeze props
     private SerializedProperty _freezeAmountProp;
     private SerializedProperty _freezeMaterialProp;
+    private SerializedProperty _freezeTrailMaterialProp;
     
     // Burn props
     private SerializedProperty _burnDurationProp;
     private SerializedProperty _burnMaterialProp;
+    private SerializedProperty _burnTrailMaterialProp;
     
     
     void OnEnable()
@@ -168,13 +172,19 @@ public class ElementTypeEditor : Editor
         // Enum
         _behaviourProp = serializedObject.FindProperty("behaviour");
         
+        // Default properties
+        _baseMaterialProp = serializedObject.FindProperty("baseMaterial");
+        _baseTrailMaterialProp = serializedObject.FindProperty("baseTrailMaterial");
+        
         // Freeze properties
         _freezeAmountProp = serializedObject.FindProperty("freezeAmount");
         _freezeMaterialProp = serializedObject.FindProperty("freezeMaterial");
+        _freezeTrailMaterialProp = serializedObject.FindProperty("freezeTrailMaterial");
         
         // Burn properties
         _burnDurationProp = serializedObject.FindProperty("burnDuration");
         _burnMaterialProp = serializedObject.FindProperty("burnMaterial");
+        _burnTrailMaterialProp = serializedObject.FindProperty("burnTrailMaterial");
         
     }
 
@@ -187,15 +197,23 @@ public class ElementTypeEditor : Editor
 
         switch (_behaviourProp.enumValueIndex)
         {
+            case (int)ElementType.ElementBehaviour.None:
+                EditorGUILayout.PropertyField(_baseMaterialProp);
+                EditorGUILayout.PropertyField(_baseTrailMaterialProp);
+                
+                break;
+            
             case (int)ElementType.ElementBehaviour.Freeze:
                 EditorGUILayout.PropertyField(_freezeAmountProp);
                 EditorGUILayout.PropertyField(_freezeMaterialProp);  
+                EditorGUILayout.PropertyField(_freezeTrailMaterialProp);
                 
                 break;
             
             case (int)ElementType.ElementBehaviour.Burn:
                 EditorGUILayout.PropertyField(_burnDurationProp);
                 EditorGUILayout.PropertyField(_burnMaterialProp); 
+                EditorGUILayout.PropertyField(_burnTrailMaterialProp);
 
                 break;
         }

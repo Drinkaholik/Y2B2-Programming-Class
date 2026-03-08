@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 // Defines pickupType, and OnPickup behaviour
@@ -6,17 +5,8 @@ using UnityEngine;
 public class Pickup : MonoBehaviour
 {
     
-    public enum PickupType
-    {
-        Shoot,
-        Movement, 
-        Effect,
-        Element
-    }
-
-    public ShootType.ShootBehaviour ShootType;
     
-    public PickupType type;
+    public ModifierType modifier;
     
     
 
@@ -27,13 +17,12 @@ public class Pickup : MonoBehaviour
             // PickupHandler is placed on player
             if (collider.TryGetComponent(out PickupHandler handler))
             {
-                handler.GetPickup(type);
+                handler.GetPickup(modifier);
             }
             
             PickupSpawner.Spawned--;
             Destroy(gameObject);
         }
-        
     }
     
     

@@ -4,16 +4,17 @@ using UnityEngine;
 
 // Holds data and methods for gun/bullet shooting behaviour
 // All shoot types are mutually exclusive
+// Uses a switch statement instead of inheritance for designer friendliness
 
 [CreateAssetMenu(fileName = "ShootType", menuName = "Scriptable Objects/ShootType")]
-public class ShootType : ScriptableObject
+public class ShootType : ModifierType
 {
     
     public enum ShootBehaviour
     {
         Default,
         Burst,
-        Multishot,
+        Spreadshot,
         Grapeshot
     }
 
@@ -36,17 +37,24 @@ public class ShootType : ScriptableObject
     [HideInInspector] [SerializeField] [Min(0.01f)] private float burstDelay;
     
     
-    [Header("Multishot Stats")] 
-    [HideInInspector] [Min(1)] public int bullets;
+    // Spreadshot stats
+    [Tooltip("Angle between each bullet in the spread")]
     [HideInInspector] [SerializeField] private float angle;
     [HideInInspector] public float maxAngle; // Necessary for dynamically updating slider
     [HideInInspector] public float totalSpread = 180f;
-    
-    
-    [Header("Grapeshot Stats")] 
-    [HideInInspector] [SerializeField] [Min(1)] private int pellets;
-    [HideInInspector] [SerializeField] [Range(0f, 180f)] private float spread;
 
+    public enum SpreadOrientation
+    {
+        Horizontal,
+        Vertical
+    }
+    
+    [Header("Multishot Stats")] // Idk why but putting the header here makes it display correctly in inspector
+    // Grapeshot stats
+    [HideInInspector] [Min(1)] public int bullets;
+    [HideInInspector] [SerializeField] [Range(0f, 180f)] private float spread;
+    [HideInInspector] [SerializeField] private SpreadOrientation spreadOrientation;
+    
     public Coroutine Routine;
     
 
@@ -62,7 +70,7 @@ public class ShootType : ScriptableObject
         Routine = null;
     }
     
-    // Needs to be a coroutine os that I can yield return the BurstRoutine
+    // Needs to be a coroutine so that I can yield return the BurstRoutine
     IEnumerator ChosenCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         switch (behaviour)
@@ -76,8 +84,8 @@ public class ShootType : ScriptableObject
                 yield return BurstCreate(firePoint, shootType, moveType, effects, elementType);
                 break;
             
-            case ShootBehaviour.Multishot:
-                MultishotCreate(firePoint, shootType, moveType, effects, elementType);
+            case ShootBehaviour.Spreadshot:
+                SpreadshotCreate(firePoint, shootType, moveType, effects, elementType);
                 yield return null;
                 break;
             
@@ -93,24 +101,12 @@ public class ShootType : ScriptableObject
         // Spawn from pool
         var newBullet = BulletPool.Spawn();
         
-        // Set modifiers
-        newBullet.shootType = shootType;
-        newBullet.moveType = moveType;
-        newBullet.effects = effects;
-        newBullet.elementType = elementType;
-        
-        // Set materials
-        newBullet.rend.material = elementType.material;
-        newBullet.trail.material = elementType.trailMaterial;
-        
-        // Set position, rotation and size
-        newBullet.transform.position = firePoint.position;
-        newBullet.transform.rotation = firePoint.rotation;
-        newBullet.transform.localScale = new Vector3(size, size, size);
+        SetModifiers(newBullet, shootType, moveType, effects, elementType);
+        SetMaterials(newBullet, elementType);
+        SetTransform(newBullet, firePoint);
         
         // Clear trailRender to prevent visual bug on bullet spawn-in
         newBullet.trail.Clear();
-        
     }
 
     // Shoots consecutive bullets in a rapid burst
@@ -121,20 +117,9 @@ public class ShootType : ScriptableObject
             // Spawn from pool
             var newBullet = BulletPool.Spawn();
             
-            // Set modifiers
-            newBullet.shootType = shootType;
-            newBullet.moveType = moveType;
-            newBullet.effects = effects;
-            newBullet.elementType = elementType;
-            
-            // Set materials
-            newBullet.rend.material = elementType.material;
-            newBullet.trail.material = elementType.trailMaterial;
-            
-            // Set position, rotation and size
-            newBullet.transform.position = firePoint.position;
-            newBullet.transform.rotation = firePoint.rotation;
-            newBullet.transform.localScale = new Vector3(size, size, size);
+            SetModifiers(newBullet, shootType, moveType, effects, elementType);
+            SetMaterials(newBullet, elementType);
+            SetTransform(newBullet, firePoint);
 
             newBullet.trail.Clear();
             
@@ -144,9 +129,9 @@ public class ShootType : ScriptableObject
     
 
     // Shoots multiple bullets in a fan shape
-    void MultishotCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
+    void SpreadshotCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
-        var startAngle = -angle / 2f;
+        var startAngle = (-angle * bullets) / 2f;
         
         var bulletSize = new Vector3(size, size, size); // Cache bullet size
         
@@ -154,15 +139,8 @@ public class ShootType : ScriptableObject
         {
             var newBullet = BulletPool.Spawn();
             
-            // Set modifiers
-            newBullet.shootType = shootType;
-            newBullet.moveType = moveType;
-            newBullet.effects = effects;
-            newBullet.elementType = elementType;
-            
-            // Set materials
-            newBullet.rend.material = elementType.material;
-            newBullet.trail.material = elementType.trailMaterial;
+            SetModifiers(newBullet, shootType, moveType, effects, elementType);
+            SetMaterials(newBullet, elementType);
             
             // Set position and size
             newBullet.transform.position = firePoint.position;
@@ -171,6 +149,11 @@ public class ShootType : ScriptableObject
             // Calculation needed to get fan spread
             var currentAngle = startAngle + (i * angle);
             var spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
+            if (spreadOrientation == SpreadOrientation.Vertical)
+            {
+                spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.right);
+            }
+            
             newBullet.transform.rotation = firePoint.rotation * spreadRotation;
             
             newBullet.trail.Clear();
@@ -181,8 +164,28 @@ public class ShootType : ScriptableObject
     // Shoots multiple bullets in a 'shotgun' blast
     void GrapeshotCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
+        var bulletSize = new Vector3(size, size, size); // Cache bullet size
         
-        
+        for (int i = 0; i < bullets; i++)
+        {
+            var newBullet = BulletPool.Spawn();
+            
+            SetModifiers(newBullet, shootType, moveType, effects, elementType);
+            SetMaterials(newBullet, elementType);
+            
+            // Set position and size
+            newBullet.transform.position = firePoint.position;
+            newBullet.transform.localScale = bulletSize;
+            
+            // Calculation needed to get spread - I hate working with rotations
+            var pelletSpread = Random.insideUnitCircle * spread;
+            var xSpread = Quaternion.AngleAxis(pelletSpread.x, Vector3.up);
+            var ySpread = Quaternion.AngleAxis(pelletSpread.y, Vector3.right);
+            
+            newBullet.transform.rotation = firePoint.rotation * xSpread * ySpread;
+            
+            newBullet.trail.Clear();
+        }
     }
 
     
@@ -194,6 +197,30 @@ public class ShootType : ScriptableObject
         {
             damageable.TakeDamage(damage);
         }
+    }
+
+    
+    // Set bullet properties //
+
+    private void SetModifiers(Bullet bullet, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
+    {
+        bullet.shootType = shootType;
+        bullet.moveType = moveType;
+        bullet.effects = effects;
+        bullet.elementType = elementType;
+    }
+    
+    private void SetMaterials(Bullet bullet, ElementType elementType)
+    {
+        bullet.rend.sharedMaterial = elementType.material;
+        bullet.trail.sharedMaterial = elementType.trailMaterial;
+    }
+
+    void SetTransform(Bullet bullet, Transform firePoint)
+    {
+        bullet.transform.position = firePoint.position;
+        bullet.transform.rotation = firePoint.rotation;
+        bullet.transform.localScale = new Vector3(size, size, size);
     }
     
 
