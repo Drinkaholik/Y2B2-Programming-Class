@@ -9,6 +9,7 @@ using UnityEngine;
 public class Turret : MonoBehaviour, IDamageable
 {
     
+
     [Header("References")] // HEADER
     [SerializeField] private Collider player;
     [SerializeField] private GameObject platform;
@@ -18,7 +19,7 @@ public class Turret : MonoBehaviour, IDamageable
     [Header("Modifiers")] // HEADER
     [SerializeField] private ShootType shootType;
     [SerializeField] private MoveType moveType;
-    [SerializeField] private List<EffectType> effectType;
+    [SerializeField] private List<EffectType> effects;
     [SerializeField] private ElementType elementType;
     
     private float _playerDistance;
@@ -74,11 +75,19 @@ public class Turret : MonoBehaviour, IDamageable
     
     
     
-    [Header("VFX")] // HEADER
+    [Header("Visuals")] // HEADER
     [SerializeField] private GameObject muzzleVFX;
     [Range(0f, 1f)][SerializeField] private float muzzleVFXSize;
     private Vector3 _muzzleVFXSize;
-    
+
+    [SerializeField] private GameObject tLight;
+    [Range(0f, 10f)][SerializeField] private float intensity = 1;
+    [SerializeField] private Color idleColour;
+    [SerializeField] private Color patrolColour;
+    [SerializeField] private Color readyColour;
+    [SerializeField] private Color attackColour;
+    private Material _lightMat;
+    private readonly int _emissionColor = Shader.PropertyToID("_EmissionColor");
     
     private bool _lookingAtPlayer;
     
@@ -99,6 +108,7 @@ public class Turret : MonoBehaviour, IDamageable
         _shootWait = new WaitForSeconds(1/fireRate);
         
         _muzzleVFXSize = new Vector3(muzzleVFXSize, muzzleVFXSize, muzzleVFXSize);
+        _lightMat = tLight.GetComponent<Renderer>().material;
     }
     
     void Update()
@@ -188,6 +198,7 @@ public class Turret : MonoBehaviour, IDamageable
         if (!_obstructed && _playerDistance <= detectRange)
         {
             _state = TurretState.Ready;
+            SetColour(readyColour);
             Debug.Log(_state);
         }
     }
@@ -200,6 +211,7 @@ public class Turret : MonoBehaviour, IDamageable
         {
             StopCoroutine(_patrolRoutine);
             _state = TurretState.Ready;
+            SetColour(readyColour);
             Debug.Log(_state);
         }
     }
@@ -238,8 +250,9 @@ public class Turret : MonoBehaviour, IDamageable
         // Rotate back to lastseen dir
         yield return RotateToAngle(startAngle);
 
-
+        // Transition to idle state
         _state = TurretState.Idle;
+        SetColour(idleColour);
         Debug.Log(_state);
     }
     
@@ -268,6 +281,7 @@ public class Turret : MonoBehaviour, IDamageable
         {
             _patrolRoutine = StartCoroutine(Patrol());
             _state = TurretState.Patrol;
+            SetColour(patrolColour);
             Debug.Log(_state);
         }
         
@@ -275,7 +289,7 @@ public class Turret : MonoBehaviour, IDamageable
         else if (_playerDistance <= attackRange)
         {
             _state = TurretState.Attack;
-            
+            SetColour(attackColour);
             Debug.Log(_state);
         }
     }
@@ -285,9 +299,11 @@ public class Turret : MonoBehaviour, IDamageable
     {
         PlatformRotate();
         BarrelRotate();
-        if (_shootRoutine != null)
+        
+        if (shootType.Routine != null)
         {
-            _shootRoutine = StartCoroutine(Shoot());
+            Debug.Log("start shooting");
+            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effects, elementType));
         }
         
         
@@ -295,7 +311,7 @@ public class Turret : MonoBehaviour, IDamageable
         if (_playerDistance > attackRange || _obstructed)
         {
             _state = TurretState.Ready;
-            
+            SetColour(readyColour);
             Debug.Log(_state);
         }
     }
@@ -329,25 +345,15 @@ public class Turret : MonoBehaviour, IDamageable
         float clampedAngle = Mathf.Clamp(nextAngle, -maxAngle, -minAngle);
         barrel.transform.localRotation = Quaternion.Euler(clampedAngle, 0, 0);
     }
-
-    IEnumerator Shoot()
+    
+    
+    
+    void SetColour(Color colour)
     {
-        
-        // Muzzle VFX
-        var vfx = Instantiate(muzzleVFX, firePoint.position, firePoint.rotation);
-        vfx.transform.parent = firePoint.transform;
-        vfx.transform.localScale = _muzzleVFXSize;
-        Destroy(vfx, 1);
-
-        if (shootType.Routine != null)
-        {
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effectType, elementType));
-        }
-        
-        yield return _shootWait;
-
+        _lightMat.color = colour;
+        _lightMat.SetColor(_emissionColor, colour * Mathf.Pow(2, intensity));
+        _lightMat.EnableKeyword("_EMISSION");
     }
-
 
     public void TakeDamage(int damage)
     {
@@ -363,6 +369,24 @@ public class Turret : MonoBehaviour, IDamageable
     }
     
     
+    // Old shoot routine, before transition to aggregation stuff
+    // IEnumerator Shoot()
+    // {
+    //     
+    //     // Muzzle VFX
+    //     var vfx = Instantiate(muzzleVFX, firePoint.position, firePoint.rotation);
+    //     vfx.transform.parent = firePoint.transform;
+    //     vfx.transform.localScale = _muzzleVFXSize;
+    //     Destroy(vfx, 1);
+    //
+    //     if (shootType.Routine != null)
+    //     {
+    //         shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effects, elementType));
+    //     }
+    //     
+    //     yield return _shootWait;
+    //
+    // }
     
     
 // Class ends here

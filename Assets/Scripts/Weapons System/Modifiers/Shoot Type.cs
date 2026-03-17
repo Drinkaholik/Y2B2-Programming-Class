@@ -43,7 +43,7 @@ public class ShootType : ModifierType
     [HideInInspector] public float maxAngle; // Necessary for dynamically updating slider
     [HideInInspector] public float totalSpread = 180f;
 
-    public enum SpreadOrientation
+    private enum SpreadOrientation
     {
         Horizontal,
         Vertical

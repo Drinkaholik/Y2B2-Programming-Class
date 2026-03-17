@@ -28,6 +28,7 @@ public class Gun : MonoBehaviour
     private InputAction _shootAction;
     private bool _tryingShoot;
     
+    
     void Start()
     {
         _shootAction = InputSystem.actions.FindAction("Attack");
@@ -63,7 +64,8 @@ public class Gun : MonoBehaviour
         }
             
     }
-
+    
+    // Only used to change the gun's materials to match that of the element
     public void OnPickup(ElementType element)
     {
         elementType = element;
