@@ -13,7 +13,6 @@ public class ShootType : ModifierType
     public enum ShootBehaviour
     {
         Default,
-        Burst,
         Spreadshot,
         Grapeshot
     }
@@ -23,18 +22,11 @@ public class ShootType : ModifierType
     
     [Header("General Stats")] 
     [Min(0)] [SerializeField] private int damage;
-    [Min(0)] public float fireRate;
+    [Min(0)] [SerializeField] private float fireRate;
     [Min(0)] public float speed;
     
     [Min(0.01f)] [SerializeField] private float size;
     public float lifetime;
-    
-    
-    [Header("Burst Stats")] 
-    [Tooltip("Number of shots per burst")]
-    [HideInInspector] [SerializeField] [Min(1)] private int burstAmount;
-    [Tooltip("Delay between each shot in a burst")]
-    [HideInInspector] [SerializeField] [Min(0.01f)] private float burstDelay;
     
     
     // Spreadshot stats
@@ -42,6 +34,9 @@ public class ShootType : ModifierType
     [HideInInspector] [SerializeField] private float angle;
     [HideInInspector] public float maxAngle; // Necessary for dynamically updating slider
     [HideInInspector] public float totalSpread = 180f;
+    
+    [HideInInspector] public float fireRateCount;
+    
 
     private enum SpreadOrientation
     {
@@ -54,44 +49,28 @@ public class ShootType : ModifierType
     [HideInInspector] [Min(1)] public int bullets;
     [HideInInspector] [SerializeField] [Range(0f, 180f)] private float spread;
     [HideInInspector] [SerializeField] private SpreadOrientation spreadOrientation;
-    
-    public Coroutine Routine;
-    
 
-    public IEnumerator ShootRoutine(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
+    void Awake()
     {
-        yield return ChosenCreate(firePoint, shootType, moveType, effects, elementType);
-        
-        // Handle fireRate
-        var waitTime = 1/fireRate;
-        if (fireRate == 0)
-            waitTime = Mathf.Epsilon;
-        yield return new WaitForSeconds(waitTime);
-        Routine = null;
+        fireRateCount = 1/fireRate;
     }
     
+    
     // Needs to be a coroutine so that I can yield return the BurstRoutine
-    IEnumerator ChosenCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
+    public void Shoot(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         switch (behaviour)
         {
             case ShootBehaviour.Default:
                 DefaultCreate(firePoint, shootType, moveType, effects, elementType);
-                yield return null;
-                break;
-            
-            case ShootBehaviour.Burst:
-                yield return BurstCreate(firePoint, shootType, moveType, effects, elementType);
                 break;
             
             case ShootBehaviour.Spreadshot:
                 SpreadshotCreate(firePoint, shootType, moveType, effects, elementType);
-                yield return null;
                 break;
             
             case ShootBehaviour.Grapeshot:
                 GrapeshotCreate(firePoint, shootType, moveType, effects, elementType);
-                yield return null;
                 break;
         }
     }
@@ -103,28 +82,12 @@ public class ShootType : ModifierType
         
         SetModifiers(newBullet, shootType, moveType, effects, elementType);
         SetMaterials(newBullet, elementType);
-        SetTransform(newBullet, firePoint);
+        newBullet.transform.position = firePoint.position;
+        newBullet.transform.rotation = firePoint.rotation;
+        newBullet.transform.localScale = new Vector3(size, size, size);
         
         // Clear trailRender to prevent visual bug on bullet spawn-in
         newBullet.trail.Clear();
-    }
-
-    // Shoots consecutive bullets in a rapid burst
-    IEnumerator BurstCreate(Transform firePoint, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
-    { 
-        for (int i = 0; i < burstAmount; i++)
-        {
-            // Spawn from pool
-            var newBullet = BulletPool.Spawn();
-            
-            SetModifiers(newBullet, shootType, moveType, effects, elementType);
-            SetMaterials(newBullet, elementType);
-            SetTransform(newBullet, firePoint);
-
-            newBullet.trail.Clear();
-            
-            yield return new WaitForSeconds(burstDelay);
-        }
     }
     
 
@@ -201,7 +164,8 @@ public class ShootType : ModifierType
 
     
     // Set bullet properties //
-
+    
+    // Kept in ShootType as it's responsible for the initial spawning of bullets
     private void SetModifiers(Bullet bullet, ShootType shootType, MoveType moveType, List<EffectType> effects, ElementType elementType)
     {
         bullet.shootType = shootType;
@@ -214,13 +178,6 @@ public class ShootType : ModifierType
     {
         bullet.rend.sharedMaterial = elementType.material;
         bullet.trail.sharedMaterial = elementType.trailMaterial;
-    }
-
-    void SetTransform(Bullet bullet, Transform firePoint)
-    {
-        bullet.transform.position = firePoint.position;
-        bullet.transform.rotation = firePoint.rotation;
-        bullet.transform.localScale = new Vector3(size, size, size);
     }
     
 

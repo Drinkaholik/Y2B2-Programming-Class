@@ -1,5 +1,3 @@
-
-
 using System.Collections;
 
 public interface IDamageable
@@ -18,7 +16,6 @@ public interface IBurnable
 
 public interface IFreezable
 {
-    
     void Freeze(int freezeAmount);
 }
 

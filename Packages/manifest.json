@@ -8,6 +8,7 @@
     "com.unity.inputsystem": "1.12.0",
     "com.unity.multiplayer.center": "1.0.0",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.unity.probuilder": "6.0.9",
     "com.unity.render-pipelines.universal": "17.0.3",
     "com.unity.sharp-zip-lib": "1.3.9",
     "com.unity.test-framework": "1.4.5",

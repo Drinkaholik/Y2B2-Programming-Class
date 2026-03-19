@@ -35,8 +35,7 @@ public class Turret : MonoBehaviour, IDamageable
     
     [Tooltip("Bullets per second")] 
     [SerializeField] private float fireRate;
-    private Coroutine _shootRoutine;
-    private WaitForSeconds _shootWait;
+    private float _count;
     
     [Tooltip("Range at which turret enters ready state")] 
     [SerializeField] private float detectRange;
@@ -105,7 +104,6 @@ public class Turret : MonoBehaviour, IDamageable
     void Start()
     {
         _patrolWait = new WaitForSeconds(waitTime);
-        _shootWait = new WaitForSeconds(1/fireRate);
         
         _muzzleVFXSize = new Vector3(muzzleVFXSize, muzzleVFXSize, muzzleVFXSize);
         _lightMat = tLight.GetComponent<Renderer>().material;
@@ -155,166 +153,170 @@ public class Turret : MonoBehaviour, IDamageable
     
     
     #region State Machine
-    private void SwitchState()
-    {
-
-        switch (_state)
+        private void SwitchState()
         {
-            case TurretState.Idle:
-                
-                IdleBehaviour();
-                
-                break;
-            
-            case TurretState.Patrol:
 
-                PatrolBehaviour();
+            switch (_state)
+            {
+                case TurretState.Idle:
+                    
+                    IdleBehaviour();
+                    
+                    break;
                 
-                break;
-            
-            case TurretState.Ready:
+                case TurretState.Patrol:
+
+                    PatrolBehaviour();
+                    
+                    break;
                 
-                ReadyBehaviour();
+                case TurretState.Ready:
+                    
+                    ReadyBehaviour();
+                    
+                    break;
                 
-                break;
-            
-            case TurretState.Attack:
-                
-                AttackBehaviour();
-                
-                break;
+                case TurretState.Attack:
+                    
+                    AttackBehaviour();
+                    
+                    break;
+            }
         }
-    }
 
-    private void IdleBehaviour()
-    {
-        // Make it so barrel moves down to minAngle
-        var nextAngle = Mathf.MoveTowardsAngle(
-            barrel.transform.eulerAngles.x, -minAngle, barrelTurnRate * Time.deltaTime);
-        
-        barrel.transform.localRotation = Quaternion.Euler(nextAngle, 0, 0);
-        
-        // Transition to ready state
-        if (!_obstructed && _playerDistance <= detectRange)
+        private void IdleBehaviour()
         {
-            _state = TurretState.Ready;
-            SetColour(readyColour);
-            Debug.Log(_state);
-        }
-    }
-    
-
-    private void PatrolBehaviour()
-    {
-        // Transition to ready state
-        if (!_obstructed && _playerDistance <= detectRange)
-        {
-            StopCoroutine(_patrolRoutine);
-            _state = TurretState.Ready;
-            SetColour(readyColour);
-            Debug.Log(_state);
-        }
-    }
-    
-    
-    IEnumerator Patrol()
-    {
-        /* Patrol behaviour should work as such:
-         1. When the player leaves range, the turret looks in their last seen direction for x time
-         2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
-         */
-        
-        var startAngle = platform.transform.localEulerAngles.y;
-        var leftAngle = startAngle - patrolAngle;
-        var rightAngle = startAngle + patrolAngle;
-        
-        // Look in last seen direction for x seconds
-        yield return new WaitForSeconds(initialWaitTime);
-        
-        // Start rotating left
-        yield return RotateToAngle(leftAngle);
-        yield return _patrolWait;
-        
-        // Start rotating right
-        yield return RotateToAngle(rightAngle);
-        yield return _patrolWait;
-        
-        // Start rotating left
-        yield return RotateToAngle(leftAngle);
-        yield return _patrolWait;
-        
-        // Start rotating right
-        yield return RotateToAngle(rightAngle);
-        yield return _patrolWait;
-        
-        // Rotate back to lastseen dir
-        yield return RotateToAngle(startAngle);
-
-        // Transition to idle state
-        _state = TurretState.Idle;
-        SetColour(idleColour);
-        Debug.Log(_state);
-    }
-    
-    // Handles rotation inside Patrol routine - needs to be IEnum instead of method
-    IEnumerator RotateToAngle(float targetAngle)
-    {
-        while (Mathf.Abs(Mathf.DeltaAngle(platform.transform.localEulerAngles.y, targetAngle)) > 0.1f)
-        {
-            var currentAngle = platform.transform.localEulerAngles.y;
+            // Make it so barrel moves down to minAngle
+            var nextAngle = Mathf.MoveTowardsAngle(
+                barrel.transform.eulerAngles.x, -minAngle, barrelTurnRate * Time.deltaTime);
             
-            var nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, patrolTurnRate * Time.deltaTime);
+            barrel.transform.localRotation = Quaternion.Euler(nextAngle, 0, 0);
             
-            platform.transform.localRotation = Quaternion.Euler(0, nextAngle, 0);
-            yield return null;
+            // Transition to ready state
+            if (!_obstructed && _playerDistance <= detectRange)
+            {
+                _state = TurretState.Ready;
+                SetColour(readyColour);
+                Debug.Log(_state);
+            }
         }
-    }
-
-    
-    private void ReadyBehaviour()
-    {
-        PlatformRotate();
-        BarrelRotate();
         
-        // Transition to patrol state
-        if (_obstructed || _playerDistance > detectRange)
+
+        private void PatrolBehaviour()
         {
-            _patrolRoutine = StartCoroutine(Patrol());
-            _state = TurretState.Patrol;
-            SetColour(patrolColour);
+            // Transition to ready state
+            if (!_obstructed && _playerDistance <= detectRange)
+            {
+                StopCoroutine(_patrolRoutine);
+                _state = TurretState.Ready;
+                SetColour(readyColour);
+                Debug.Log(_state);
+            }
+        }
+        
+        
+        IEnumerator Patrol()
+        {
+            /* Patrol behaviour should work as such:
+             1. When the player leaves range, the turret looks in their last seen direction for x time
+             2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
+             */
+            
+            var startAngle = platform.transform.localEulerAngles.y;
+            var leftAngle = startAngle - patrolAngle;
+            var rightAngle = startAngle + patrolAngle;
+            
+            // Look in last seen direction for x seconds
+            yield return new WaitForSeconds(initialWaitTime);
+            
+            // Start rotating left
+            yield return RotateToAngle(leftAngle);
+            yield return _patrolWait;
+            
+            // Start rotating right
+            yield return RotateToAngle(rightAngle);
+            yield return _patrolWait;
+            
+            // Start rotating left
+            yield return RotateToAngle(leftAngle);
+            yield return _patrolWait;
+            
+            // Start rotating right
+            yield return RotateToAngle(rightAngle);
+            yield return _patrolWait;
+            
+            // Rotate back to lastseen dir
+            yield return RotateToAngle(startAngle);
+
+            // Transition to idle state
+            _state = TurretState.Idle;
+            SetColour(idleColour);
             Debug.Log(_state);
         }
         
-        // Transition to attack state
-        else if (_playerDistance <= attackRange)
+        // Handles rotation inside Patrol routine - needs to be IEnum instead of method
+        IEnumerator RotateToAngle(float targetAngle)
         {
-            _state = TurretState.Attack;
-            SetColour(attackColour);
-            Debug.Log(_state);
+            while (Mathf.Abs(Mathf.DeltaAngle(platform.transform.localEulerAngles.y, targetAngle)) > 0.1f)
+            {
+                var currentAngle = platform.transform.localEulerAngles.y;
+                
+                var nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, patrolTurnRate * Time.deltaTime);
+                
+                platform.transform.localRotation = Quaternion.Euler(0, nextAngle, 0);
+                yield return null;
+            }
         }
-    }
+
+        
+        private void ReadyBehaviour()
+        {
+            PlatformRotate();
+            BarrelRotate();
+            
+            // Transition to patrol state
+            if (_obstructed || _playerDistance > detectRange)
+            {
+                _patrolRoutine = StartCoroutine(Patrol());
+                _state = TurretState.Patrol;
+                SetColour(patrolColour);
+                Debug.Log(_state);
+            }
+            
+            // Transition to attack state
+            else if (_playerDistance <= attackRange)
+            {
+                _state = TurretState.Attack;
+                SetColour(attackColour);
+                Debug.Log(_state);
+            }
+        }
 
 
-    private void AttackBehaviour()
-    {
-        PlatformRotate();
-        BarrelRotate();
-        
-        if (shootType.Routine != null)
+        private void AttackBehaviour()
         {
-            Debug.Log("start shooting");
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effects, elementType));
+            PlatformRotate();
+            BarrelRotate();
+            
+            // Shooting logic
+            if (_count <= 0)
+            {
+                shootType.Shoot(firePoint, shootType, moveType, effects, elementType);
+                _count = shootType.fireRateCount;
+            }
+            _count -= Time.deltaTime;
+            
+            
+            
+            
+            // Transition to ready state
+            if (_playerDistance > attackRange || _obstructed)
+            {
+                _state = TurretState.Ready;
+                SetColour(readyColour);
+                Debug.Log(_state);
+            }
         }
-        
-        
-        // Transition to ready state
-        if (_playerDistance > attackRange || _obstructed)
-        {
-            _state = TurretState.Ready;
-            SetColour(readyColour);
-            Debug.Log(_state);
-        }
-    }
     #endregion
 
     

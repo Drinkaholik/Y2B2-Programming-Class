@@ -15,21 +15,35 @@ public class Bullet : MonoBehaviour
     [HideInInspector] public ElementType elementType;
 
     public TrailRenderer trail;
+    
+    // Needed for effects
+    private bool _despawn; // Only despawn on hit if true
+    public Collider ignoreHit; // Needed so pierced enemies arent hit every frame
+    public int pierceCount;
+    public int bounceCount;
 
     private Renderer _rend;
+    
+    // Why do I need a getter here? simply setting it in start doesnt work....
     public Renderer rend
     {
         get
         {
-            if (_rend == null) _rend = GetComponent<Renderer>();
+            if  (_rend == null) _rend = GetComponent<Renderer>();
             return _rend;
         }
     }
+    
 
     void Start()
     {
         trail = GetComponent<TrailRenderer>();
-        _rend = GetComponent<Renderer>();
+        //rend = GetComponent<Renderer>();
+    }
+
+    void Awake()
+    {
+        _despawn = false;
     }
     
     
@@ -74,32 +88,39 @@ public class Bullet : MonoBehaviour
         {
             transform.position = hit.point;
             
-            OnHit(hit.collider);
+            OnHit(hit);
         }
         
     }
     
     
     // On hit
-    void OnHit(Collider other)
+    void OnHit(RaycastHit hit)
     {
-        // Apply damage
-        shootType.OnHit(other);
-        
-        // Apply effects
-        foreach (EffectType fx in effects)
+        if (hit.collider != ignoreHit)
         {
-            fx.OnHit(gameObject, other);
+            // Apply damage
+            shootType.OnHit(hit.collider);
+        
+            // Apply effects
+            foreach (EffectType fx in effects)
+            {
+                fx.OnHit(this, hit);
+            }
+            
+            // Apply elemental effect
+            if (elementType != null)
+            {
+                elementType.ApplyEffect(hit.collider);
+            }
+            
+            ignoreHit = null;
+            
+            if (_despawn)
+                ReturnToPool();
+
+            
         }
-        
-        
-        // Apply elemental effect
-        if (elementType != null)
-        {
-            elementType.ApplyEffect(other);
-        }
-        
-        ReturnToPool();
         
     }
     

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,6 +11,7 @@ public class Gun : MonoBehaviour
 
     [Header("Combat")] 
     [SerializeField] private Transform firePoint;
+    [SerializeField] private bool isBurst;
     
     [Header("Modifiers")] 
     public ShootType shootType;
@@ -27,6 +29,7 @@ public class Gun : MonoBehaviour
     
     private InputAction _shootAction;
     private bool _tryingShoot;
+    private float _count;
     
     
     void Start()
@@ -58,11 +61,13 @@ public class Gun : MonoBehaviour
 
     void Shoot()
     {
-        if (_tryingShoot && shootType.Routine == null)
+        if (_tryingShoot && _count <= 0)
         {
-            shootType.Routine = StartCoroutine(shootType.ShootRoutine(firePoint, shootType, moveType, effects, elementType));
+            shootType.Shoot(firePoint, shootType, moveType, effects, elementType);
+            _count = shootType.fireRateCount;
         }
-            
+        _count -= Time.deltaTime;
+        
     }
     
     // Only used to change the gun's materials to match that of the element

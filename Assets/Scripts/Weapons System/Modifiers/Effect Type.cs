@@ -15,40 +15,40 @@ public class EffectType : ModifierType
     }
     
     public EffectBehaviour behaviour;
-
+    
     
     [Header("PierceStats")] 
     [Tooltip("Number of enemies it will pierce before despawning")]
-    [HideInInspector] public int pierce;
+    [Range(1, 100)] [HideInInspector] public int pierce;
 
     [Header("BounceStats")] 
     [Tooltip("Number of times it will bounce before despawning")]
-    [HideInInspector] public int bounciness;
+    [Range(1, 100)] [HideInInspector] public int bounciness;
 
 
 
-    [Header("ExplosionStats")] [SerializeField]
-    private int explosionDamage;
-    [SerializeField] private float explosionRadius;
-    [SerializeField] private GameObject explosionVFX;
+    [Header("ExplosionStats")] 
+    [HideInInspector] [SerializeField] private int explosionDamage;
+    [HideInInspector] [SerializeField] private float explosionRadius;
+    [HideInInspector] [SerializeField] private GameObject explosionVFX;
 
     private Collider[] _results; // Holds results from OverlapSphere
-
-
-    public void OnHit(GameObject bullet, Collider other)
+    
+    
+    public void OnHit(Bullet bullet, RaycastHit hit)
     {
         switch (behaviour)
         {
             case EffectBehaviour.Pierce:
-                PierceHit(bullet, other);
+                PierceHit(bullet, hit);
                 
                 break;
             case EffectBehaviour.Bounce:
-                BounceHit(bullet, other);
+                BounceHit(bullet, hit);
                 
                 break;
             case EffectBehaviour.Explode:
-                ExplodeHit(bullet, other);
+                ExplodeHit(bullet, hit);
                 
                 break;
         }
@@ -56,18 +56,25 @@ public class EffectType : ModifierType
         
     }
 
-    private void PierceHit(GameObject bullet, Collider other)
+    private void PierceHit(Bullet bullet, RaycastHit hit)
     {
-
+        if (hit.collider.CompareTag("Enemy"))
+        {
+            
+            bullet.ignoreHit = hit.collider;
+        }
 
     }
 
-    private void BounceHit(GameObject bullet, Collider other)
+    private void BounceHit(Bullet bullet, RaycastHit hit)
     {
-
+        if (hit.collider.CompareTag("Environment"))
+        {
+            bullet.transform.forward = hit.normal;
+        }
     }
 
-    private void ExplodeHit(GameObject bullet, Collider other)
+    private void ExplodeHit(Bullet bullet, RaycastHit hit)
     {
         Physics.OverlapSphereNonAlloc(bullet.transform.position, explosionRadius, _results);
         foreach (var item in _results)

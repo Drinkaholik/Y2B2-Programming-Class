@@ -32,10 +32,6 @@ public class ShootTypeEditor : Editor
         // Enum
         _behaviourProp = serializedObject.FindProperty("behaviour");
         
-        // Burst props
-        _burstAmountProp = serializedObject.FindProperty("burstAmount");
-        _burstDelayProp = serializedObject.FindProperty("burstDelay");
-        
         // Multishot props
         _bulletsProp = serializedObject.FindProperty("bullets");
         _angleProp = serializedObject.FindProperty("angle");
@@ -58,11 +54,6 @@ public class ShootTypeEditor : Editor
         // Display conditional properties depending on type
         switch (_behaviourProp.enumValueIndex)
         {
-            case (int)ShootType.ShootBehaviour.Burst:
-                EditorGUILayout.PropertyField(_burstAmountProp);
-                EditorGUILayout.PropertyField(_burstDelayProp);
-                break;
-
             
             case (int)ShootType.ShootBehaviour.Spreadshot:
                 EditorGUILayout.PropertyField(_bulletsProp);
@@ -218,6 +209,75 @@ public class ElementTypeEditor : Editor
                 break;
         }
         
+        // Apply any changes made in inspector
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+
+[CustomEditor(typeof(EffectType))]
+public class EffectTypeEditor : Editor
+{
+    // Enum
+    private SerializedProperty _behaviourProp;
+
+    // Pierce props
+    private SerializedProperty _pierceProp;
+
+    // Bounce props
+    private SerializedProperty _bouncinessProp;
+
+    // Explode props
+    private SerializedProperty _explosionDamageProp;
+    private SerializedProperty _explosionRadiusProp;
+    private SerializedProperty _explosionVFXProp;
+
+
+    void OnEnable()
+    {
+        // Link properties //
+        // Enum
+        _behaviourProp = serializedObject.FindProperty("behaviour");
+
+        // Pierce properties
+        _pierceProp = serializedObject.FindProperty("pierce");
+
+        // Bounce properties
+        _bouncinessProp = serializedObject.FindProperty("bounciness");
+        
+        // Explode properties
+        _explosionDamageProp = serializedObject.FindProperty("explosionDamage");
+        _explosionRadiusProp = serializedObject.FindProperty("explosionRadius");
+        _explosionVFXProp = serializedObject.FindProperty("explosionVFX");
+
+    }
+
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        DrawDefaultInspector();
+
+        switch (_behaviourProp.enumValueIndex)
+        {
+            case (int)EffectType.EffectBehaviour.Pierce:
+                EditorGUILayout.PropertyField(_pierceProp);
+
+                break;
+
+            case (int)EffectType.EffectBehaviour.Bounce:
+                EditorGUILayout.PropertyField(_bouncinessProp);
+
+                break;
+
+            case (int)EffectType.EffectBehaviour.Explode:
+                EditorGUILayout.PropertyField(_bouncinessProp);
+                EditorGUILayout.PropertyField(_explosionRadiusProp);
+                EditorGUILayout.PropertyField(_explosionVFXProp);
+
+                break;
+        }
+
         // Apply any changes made in inspector
         serializedObject.ApplyModifiedProperties();
     }
