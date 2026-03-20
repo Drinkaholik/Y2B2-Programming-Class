@@ -20,7 +20,6 @@ public class Pickup : MonoBehaviour
                 handler.GetPickup(modifier);
             }
             
-            PickupSpawner.Spawned--;
             Destroy(gameObject);
         }
     }

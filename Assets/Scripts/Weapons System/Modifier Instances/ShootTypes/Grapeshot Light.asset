@@ -12,17 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 443e96d04d20b9647962cf63b8953aa2, type: 3}
   m_Name: Grapeshot Light
   m_EditorClassIdentifier: 
-  behaviour: 3
+  behaviour: 2
   damage: 1
   fireRate: 1.8
   speed: 87.03
   size: 0.1
   lifetime: 0.38
-  burstAmount: 3
-  burstDelay: 0.08
   angle: 0.96256685
   maxAngle: 15
   totalSpread: 180
+  fireRateCount: 0.5555556
   bullets: 12
   spread: 6
   spreadOrientation: 0

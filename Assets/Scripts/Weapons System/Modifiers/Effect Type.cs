@@ -70,7 +70,9 @@ public class EffectType : ModifierType
     {
         if (hit.collider.CompareTag("Environment"))
         {
-            bullet.transform.forward = hit.normal;
+            var incomingVector = bullet.transform.forward;
+            var outgoingVector = Vector3.Reflect(incomingVector, hit.normal);
+            bullet.transform.forward = outgoingVector;
         }
     }
 

@@ -9,9 +9,8 @@ using UnityEngine;
 public class Turret : MonoBehaviour, IDamageable
 {
     
-
     [Header("References")] // HEADER
-    [SerializeField] private Collider player;
+    private Collider _player;
     [SerializeField] private GameObject platform;
     [SerializeField] private GameObject barrel;
     [SerializeField] private Transform firePoint;
@@ -27,8 +26,6 @@ public class Turret : MonoBehaviour, IDamageable
     private bool _obstructed;
     
     
-    
-    
     [Header("Combat")] // HEADER
     [SerializeField] private int maxHealth;
     private int _health;
@@ -41,10 +38,11 @@ public class Turret : MonoBehaviour, IDamageable
     [SerializeField] private float detectRange;
     [Tooltip("Range at which turret begins attacking")] 
     [SerializeField] private float attackRange;
-    
-    
-    
+
+
     [Header("Patrol")] // HEADER
+    [Tooltip("Number of times the turret will turn left and right")] 
+    [SerializeField] private int timesTurned = 1;
     [Tooltip("Time spent looking at player's last location")] 
     [SerializeField] private float initialWaitTime;
     [Tooltip("Time spent waiting at left or rightmost position")] 
@@ -104,6 +102,7 @@ public class Turret : MonoBehaviour, IDamageable
     void Start()
     {
         _patrolWait = new WaitForSeconds(waitTime);
+        _player = GameObject.FindWithTag("Player").GetComponent<Collider>();
         
         _muzzleVFXSize = new Vector3(muzzleVFXSize, muzzleVFXSize, muzzleVFXSize);
         _lightMat = tLight.GetComponent<Renderer>().material;
@@ -131,7 +130,7 @@ public class Turret : MonoBehaviour, IDamageable
             if (obj.transform.IsChildOf(transform))
                 continue;
             
-            _obstructed = obj.transform != player.transform;
+            _obstructed = obj.transform != _player.transform;
             //Debug.Log(_obstructed);
 
             break;
@@ -146,8 +145,8 @@ public class Turret : MonoBehaviour, IDamageable
     private void PlayerInfo()
     {
         // All calcs use the body transform as the origin 
-        _playerDir = (player.transform.position - barrel.transform.parent.position).normalized;
-        _playerDistance = Vector3.Distance(player.transform.position, barrel.transform.parent.position);
+        _playerDir = (_player.transform.position - barrel.transform.parent.position).normalized;
+        _playerDistance = Vector3.Distance(_player.transform.position, barrel.transform.parent.position);
     }
 
     
@@ -217,10 +216,6 @@ public class Turret : MonoBehaviour, IDamageable
         
         IEnumerator Patrol()
         {
-            /* Patrol behaviour should work as such:
-             1. When the player leaves range, the turret looks in their last seen direction for x time
-             2. Then, it constantly looks left and right within X degrees of that direction, with a small stop at the leftmost/rightmost position
-             */
             
             var startAngle = platform.transform.localEulerAngles.y;
             var leftAngle = startAngle - patrolAngle;
@@ -229,21 +224,15 @@ public class Turret : MonoBehaviour, IDamageable
             // Look in last seen direction for x seconds
             yield return new WaitForSeconds(initialWaitTime);
             
-            // Start rotating left
-            yield return RotateToAngle(leftAngle);
-            yield return _patrolWait;
+            // Rotate left, then right
+            for (int i = 0; i < timesTurned; i++)
+            {
+                yield return RotateToAngle(leftAngle);
+                yield return _patrolWait;
             
-            // Start rotating right
-            yield return RotateToAngle(rightAngle);
-            yield return _patrolWait;
-            
-            // Start rotating left
-            yield return RotateToAngle(leftAngle);
-            yield return _patrolWait;
-            
-            // Start rotating right
-            yield return RotateToAngle(rightAngle);
-            yield return _patrolWait;
+                yield return RotateToAngle(rightAngle);
+                yield return _patrolWait;
+            }
             
             // Rotate back to lastseen dir
             yield return RotateToAngle(startAngle);
@@ -322,14 +311,14 @@ public class Turret : MonoBehaviour, IDamageable
     
     void PlatformRotate()
     {
-        TransformUtils.RotateAt(platform,player.transform.position, platformTurnRate, transform.up);
+        TransformUtils.RotateAt(platform,_player.transform.position, platformTurnRate, transform.up);
     }
     
     // It fucking works!!! Utter bullshit that it took this long
 
     void BarrelRotate()
     {
-        var target = player.transform.position;
+        var target = _player.transform.position;
         var targetDir = (barrel.transform.position - target).normalized;
         var targetRotation =  Quaternion.LookRotation(targetDir);
         

@@ -12,17 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 443e96d04d20b9647962cf63b8953aa2, type: 3}
   m_Name: Spread H Light
   m_EditorClassIdentifier: 
-  behaviour: 2
+  behaviour: 1
   damage: 3
   fireRate: 1.41
   speed: 120
   size: 0.1
   lifetime: 0.4
-  burstAmount: 3
-  burstDelay: 0.08
   angle: 2
   maxAngle: 45
   totalSpread: 180
+  fireRateCount: 0.7092199
   bullets: 4
   spread: 10
   spreadOrientation: 0

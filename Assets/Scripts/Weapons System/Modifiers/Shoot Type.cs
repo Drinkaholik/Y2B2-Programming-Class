@@ -112,6 +112,7 @@ public class ShootType : ModifierType
             // Calculation needed to get fan spread
             var currentAngle = startAngle + (i * angle);
             var spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.up);
+            
             if (spreadOrientation == SpreadOrientation.Vertical)
             {
                 spreadRotation = Quaternion.AngleAxis(currentAngle, Vector3.right);
@@ -121,7 +122,6 @@ public class ShootType : ModifierType
             
             newBullet.trail.Clear();
         }
-
     }
 
     // Shoots multiple bullets in a 'shotgun' blast

@@ -51,9 +51,8 @@ public class MoveType : ModifierType
 
     private void DefaultMove(GameObject bullet, float speed)
     {
-        moveDir = Vector3.forward;
-        
-        bullet.transform.Translate(moveDir * (speed * Time.deltaTime));
+        moveDir = bullet.transform.forward;
+        bullet.transform.Translate(moveDir * (speed * Time.deltaTime), Space.World);
     }
 
     private void SidewindMove(GameObject bullet, float speed, float timeLived)
@@ -73,8 +72,8 @@ public class MoveType : ModifierType
         var sin = amplitude * Mathf.Sin((2 * Mathf.PI * timeLived * frequency) + (0.5f * Mathf.PI));
         
         // Apply movement
-        moveDir = (Vector3.forward + (_direction * sin)).normalized;
-        bullet.transform.Translate( moveDir * (speed * Time.deltaTime));
+        moveDir = (bullet.transform.forward + (_direction * sin)).normalized;
+        bullet.transform.Translate( moveDir * (speed * Time.deltaTime),  Space.World);
         
     }
 
