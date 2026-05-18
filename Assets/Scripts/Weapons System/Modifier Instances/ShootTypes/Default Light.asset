@@ -17,12 +17,11 @@ MonoBehaviour:
   fireRate: 8
   speed: 80
   size: 0.1
-  lifetime: 0.38
-  burstAmount: 3
-  burstDelay: 0.08
+  lifetime: 3
   angle: 0.96256685
   maxAngle: 15
   totalSpread: 180
+  fireRateCount: 0.125
   bullets: 12
   spread: 10
   spreadOrientation: 0

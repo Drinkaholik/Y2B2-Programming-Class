@@ -184,6 +184,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3049842590723118862, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
+      propertyPath: shootType
+      value: 
+      objectReference: {fileID: 11400000, guid: e419e2a7e74963249a1c8262bf1615cd, type: 2}
+    - target: {fileID: 3049842590723118862, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
+      propertyPath: elementType
+      value: 
+      objectReference: {fileID: 11400000, guid: 81f62318458d920419ac57ce47ba0dc1, type: 2}
+    - target: {fileID: 3049842590723118862, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
+      propertyPath: effects.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4440606869252928033, guid: d05d8d12119d57a40aee75f2192add3f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

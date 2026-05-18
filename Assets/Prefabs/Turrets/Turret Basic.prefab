@@ -651,7 +651,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6664422912612672860}
-  - component: {fileID: 4955742859471046205}
+  - component: {fileID: 3049842590723118862}
   m_Layer: 0
   m_Name: Turret Basic
   m_TagString: Untagged
@@ -676,7 +676,7 @@ Transform:
   - {fileID: 5949856964383759287}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4955742859471046205
+--- !u!114 &3049842590723118862
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -685,35 +685,39 @@ MonoBehaviour:
   m_GameObject: {fileID: 8992962231614778064}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ead366263254c8c4bb610ab413146cae, type: 3}
+  m_Script: {fileID: 11500000, guid: 58a7c0c3d2aaa694dbd0d0507148e425, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 3766402039103678778, guid: 062438e2963835246988b24111a55c99, type: 3}
+  idleState: {fileID: 0}
+  patrolState: {fileID: 0}
+  readyState: {fileID: 0}
+  attackState: {fileID: 0}
+  player: {fileID: 0}
   platform: {fileID: 3496437132383775882}
   barrel: {fileID: 5367229352093038020}
   firePoint: {fileID: 6736461536745999008}
-  shootType: {fileID: 11400000, guid: e419e2a7e74963249a1c8262bf1615cd, type: 2}
+  shootType: {fileID: 11400000, guid: a29dcb1659a81244dba632e0a1cef7d9, type: 2}
   moveType: {fileID: 11400000, guid: c671f2d96df1dbd49b0f359040251d0c, type: 2}
   effects: []
   elementType: {fileID: 11400000, guid: 81f62318458d920419ac57ce47ba0dc1, type: 2}
+  playerDistance: 0
+  playerDir: {x: 0, y: 0, z: 0}
+  obstructed: 0
   maxHealth: 200
-  fireRate: 4
+  health: 0
   detectRange: 30
   attackRange: 20
+  timesTurned: 2
   initialWaitTime: 2
   waitTime: 0.8
   patrolTurnRate: 40
   patrolAngle: 40
   platformTurnRate: 90
   barrelTurnRate: 90
-  shootAngle: 50
   minAngle: -30
   maxAngle: 60
   muzzleVFX: {fileID: 8157769222371710761, guid: 0b388d709adff2846a67e53cab7640a9, type: 3}
   muzzleVFXSize: 0.2
   tLight: {fileID: 1228516153967188959}
   intensity: 2
-  idleColour: {r: 0.06716633, g: 1, b: 0, a: 1}
-  patrolColour: {r: 0, g: 0.80305076, b: 1, a: 1}
-  readyColour: {r: 1, g: 0.4185806, b: 0, a: 1}
-  attackColour: {r: 1, g: 0, b: 0, a: 1}
+  lightMat: {fileID: 0}

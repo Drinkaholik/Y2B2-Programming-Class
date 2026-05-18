@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEngine;
 
 public interface IDamageable
 {
@@ -18,5 +19,8 @@ public interface IFreezable
 {
     void Freeze(int freezeAmount);
 }
+
+
+
 
 
